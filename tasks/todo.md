@@ -53,8 +53,8 @@
 **描述**：`.github/workflows/build.yml`：ubuntu-latest + steamcmd 匿名下载 + build Release + 上传 artifact；先落地本地，远端建立后启用。
 
 **验收**：
-- [ ] YAML 语法通过（本地校验）
-- [ ] （远端就绪后）一次绿色运行，artifact 含 `0CywApi.dll`
+- [x] YAML 语法通过（本地校验：`yaml.safe_load` → OK）
+- [x] 绿色运行：**run #2（`823944d`）success** ✓（含修复后的安装链路 + 缓存保存 + 构建 + 26 单测 + artifact）
 
 **验证**：workflow 运行记录；artifact 下载检查。
 
@@ -70,7 +70,7 @@
 ### Checkpoint CP0
 - [x] 本地 Release 构建绿（0 警告 0 错误 + 单测 1/1 通过）
 - [x] 服务器加载干净（插件成功加载并启用；卸载/重载周期后续补测）
-- [x] CI 就绪（工作流已写；GitHub 远端建立后启用验证）
+- [x] CI 就绪并**已验证**：修复首跑问题后 run #2（`823944d`）全绿 ✓（含服务端拉取/缓存/构建/单测/artifact）
 - [x] 👤 人工评审通过（2026-11-08）→ 已进入 Phase 1
 
 ---
@@ -247,4 +247,6 @@
   - 追溯落地：12 个源文件加 `<remarks>Requirements:`、测试加 `[Trait("Req")]`、测试总数 26。
   - **全部联测遗留项关闭**（异常隔离/越界警告/BuildInfo 字面 ✓ + 坏配置/禁用 ✓）；剩余："完整回合"需真实玩家（可选）。
   - 基线标签：`v0.1.0-phase1`（注释标签）。
-  - **CI 首跑失败修复**（同日）：根因=steamcmd 首次运行仅自举自我更新、链式指令未执行 → refs 目录缺失；次要隐患=失败时可能把空 refs 目录缓存。修复：工作流改为「先自举一次 → 安装循环 + `LabApi.dll` 存在性验证（3 次重试）→ 缓存 restore/save 分离 + key 升级 `v2`」。待推送后重跑验证。
+  - **CI 首跑失败修复**（同日）：根因=steamcmd 首次运行仅自举自我更新、链式指令未执行 → refs 目录缺失；次要隐患=失败时可能把空 refs 目录缓存。修复：工作流改为「先自举一次 → 安装循环 + `LabApi.dll` 存在性验证（3 次重试）→ 缓存 restore/save 分离 + key 升级 `v2`」。
+  - **CI 修复验证通过**：run #2（commit `823944d`）**全绿**（104 秒：服务端拉取 + 缓存保存 + 构建 + 26 单测 + artifact 上传）；修复前 run #1 的失败已成为历史。远端仓库：`github.com/NewChuyuewei/sl-api`（public）。
+  - **Action 版本升级**（消除 Node20 弃用警告）：`checkout@v7` / `setup-dotnet@v6` / `cache(restore|save)@v6` / `upload-artifact@v7`（以 GitHub API 查得的最新主版本为准）；推送后由 run #3 验证（同时验证缓存命中路径）。

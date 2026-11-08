@@ -14,15 +14,15 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
       - name: Restore SCP:SL reference cache
         id: refs-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: D:\scpsl-refs
           key: ${{ env.REFS_CACHE_KEY }}
@@ -48,7 +48,7 @@ jobs:
 
       - name: Save SCP:SL reference cache
         if: steps.refs-restore.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: D:\scpsl-refs
           key: ${{ env.REFS_CACHE_KEY }}
@@ -63,7 +63,7 @@ jobs:
         run: dotnet test -c Release --no-build
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cywapi
           path: src/CywApi/bin/Release/net48/0CywApi.dll
