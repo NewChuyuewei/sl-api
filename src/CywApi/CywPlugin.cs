@@ -1,6 +1,6 @@
 using System;
+using CywApi.Modules;
 using LabApi.Features;
-using LabApi.Features.Console;
 using LabApi.Loader.Features.Plugins;
 using LabApi.Loader.Features.Plugins.Enums;
 
@@ -25,7 +25,7 @@ public sealed class CywPlugin : Plugin<CywConfig>
     public override string Author => "CYW";
 
     /// <inheritdoc/>
-    public override Version Version { get; } = new(0, 1, 0);
+    public override Version Version { get; } = CywVersion.Current;
 
     /// <inheritdoc/>
     public override Version RequiredApiVersion { get; } = new(LabApiProperties.CompiledVersion);
@@ -41,14 +41,21 @@ public sealed class CywPlugin : Plugin<CywConfig>
     {
         Instance = this;
 
-        Logger.Info($"CYW's API v{Version.ToString(3)} enabled (LabAPI {LabApiProperties.CurrentVersion}).");
+        CywLog.Info($"&6CYW's API &fv{CywVersion.Display} &7starting (LabAPI {LabApiProperties.CurrentVersion})...");
+
+        CywModuleManager.Register(new CompatibilityModule());
+        CywModuleManager.Register(new PatchingModule());
+        CywModuleManager.EnableAll();
+
+        CywLog.Info($"&aCYW's API v{CywVersion.Display} enabled.");
     }
 
     /// <inheritdoc/>
     public override void Disable()
     {
-        Instance = null!;
+        CywModuleManager.DisableAll();
 
-        Logger.Info("CYW's API disabled.");
+        CywLog.Info("CYW's API disabled.");
+        Instance = null!;
     }
 }

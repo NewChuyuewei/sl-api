@@ -44,7 +44,17 @@ LocalAdmin 实际传给 `SCPSL.exe` 的参数（官方格式，供参考）：
 4. **服务器不自带 Harmony/Newtonsoft**：`SCPSL_Data\Managed` 里没有 `0Harmony.dll`。使用 Harmony 的插件必须把 `0Harmony.dll` 放到 `dependencies\global\`。
 5. 首次启动会生成服务器配置（`config\<port>\`）；日志文件位置分散（LocalAdmin 输出 / `%LOCALAPPDATA%Low\Northwood\SCPSL\`），以 LocalAdmin 控制台输出为主要诊断源。
 
-## 4. 开发循环
+## 4. 插件配置与开关
+
+| 路径 | 用途 |
+|---|---|
+| `LabAPI\configs\<port>\CywApi\config.yml` | 插件配置（首次启用自动生成；**坏文件回退默认值**并告警，插件仍能启用） |
+| `LabAPI\configs\<port>\CywApi\properties.yml` | `is_enabled: true/false` 控制插件是否启用（改后需重启服务器生效） |
+
+> ⚠️ 脚本编码注意：Windows PowerShell 5.1 会把**无 BOM 的 .ps1 文件按 ANSI 编码解析**——
+> 仓库内 `.ps1` 一律保持**纯 ASCII**（注释与输出都用英文），否则中文会导致解析失败。
+
+## 5. 开发循环
 
 ```
 1. dotnet build -c Release

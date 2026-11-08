@@ -1,5 +1,6 @@
-# 将 CYW's API 构建产物部署到本地 LabAPI 插件目录（Windows）。
-# 用法：powershell -File scripts\dev\deploy.ps1 [-Configuration Release]
+# Deploys the CYW's API build output into the local LabAPI plugin folders (Windows).
+# Usage: powershell -File scripts\dev\deploy.ps1 [-Configuration Release]
+# NOTE: keep this file ASCII-only — Windows PowerShell 5.1 reads non-BOM .ps1 files as ANSI.
 param(
     [string]$Configuration = 'Release'
 )
@@ -13,7 +14,7 @@ $pluginsDir = Join-Path $lab 'plugins\global'
 $depsDir = Join-Path $lab 'dependencies\global'
 
 if (-not (Test-Path (Join-Path $bin '0CywApi.dll'))) {
-    throw "未找到构建产物：$bin\0CywApi.dll（先运行 dotnet build -c $Configuration）"
+    throw "Build output not found: $bin\0CywApi.dll (run 'dotnet build -c $Configuration' first)"
 }
 
 New-Item -ItemType Directory -Force -Path $pluginsDir, $depsDir | Out-Null
@@ -22,5 +23,5 @@ Copy-Item (Join-Path $bin '0CywApi.dll') $pluginsDir -Force
 Copy-Item (Join-Path $bin 'CywApi.Core.dll') $depsDir -Force
 Copy-Item (Join-Path $bin '0Harmony.dll') $depsDir -Force
 
-Write-Output "已部署到 $lab :"
-Get-ChildItem $pluginsDir, $depsDir -File | Select-Object -ExpandProperty FullName
+Write-Output "Deployed to: $lab"
+Get-ChildItem $pluginsDir, $depsDir -File | Select-Object -ExpandProperty Name
