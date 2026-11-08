@@ -6,8 +6,12 @@
 
 ## 状态
 
-🚧 开发中（Phase 0：环境与骨架）。
-计划与任务清单见 [`tasks/plan.md`](tasks/plan.md) 与 [`tasks/todo.md`](tasks/todo.md)。
+🚧 开发中——**Phase 0（环境与骨架）已完成**：脚手架可构建、插件已在真实 SCP:SL 服务器上验证加载
+（`[0CywApi] CYW's API v0.1.0 enabled (LabAPI 1.1.7)`）。
+
+- 计划与任务清单：[`tasks/plan.md`](tasks/plan.md) / [`tasks/todo.md`](tasks/todo.md)
+- 本地测试服搭建（重要坑位手册）：[`docs/dev/test-server.md`](docs/dev/test-server.md)
+- 参考实现功能规格：[`docs/reference/labextended-feature-spec.md`](docs/reference/labextended-feature-spec.md)
 
 ## 环境要求
 
