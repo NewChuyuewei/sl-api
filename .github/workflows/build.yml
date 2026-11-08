@@ -8,6 +8,7 @@ on:
 
 env:
   SL_REFERENCES: D:\scpsl-refs
+  REFS_CACHE_KEY: scpsl-refs-996560-v2
 
 jobs:
   build:
@@ -19,22 +20,38 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Cache SCP:SL reference DLLs
-        id: refs-cache
-        uses: actions/cache@v4
+      - name: Restore SCP:SL reference cache
+        id: refs-restore
+        uses: actions/cache/restore@v4
         with:
           path: D:\scpsl-refs
-          key: scpsl-refs-996560-v1
+          key: ${{ env.REFS_CACHE_KEY }}
 
       - name: Fetch SCP:SL dedicated server (cache miss)
-        if: steps.refs-cache.outputs.cache-hit != 'true'
+        if: steps.refs-restore.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           Invoke-WebRequest -Uri 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip' -OutFile 'D:\steamcmd.zip'
           Expand-Archive -Path 'D:\steamcmd.zip' -DestinationPath 'D:\steamcmd' -Force
-          & 'D:\steamcmd\steamcmd.exe' +force_install_dir 'D:\scpsl-server' +login anonymous +app_update 996560 validate +quit
+          # First steamcmd run only self-updates the bootstrapper and exits WITHOUT executing
+          # chained commands. Run it once to settle, then install for real.
+          & 'D:\steamcmd\steamcmd.exe' +quit
+          $installed = $false
+          for ($attempt = 1; $attempt -le 3 -and -not $installed; $attempt++) {
+            & 'D:\steamcmd\steamcmd.exe' +force_install_dir 'D:\scpsl-server' +login anonymous +app_update 996560 validate +quit
+            $installed = Test-Path 'D:\scpsl-server\SCPSL_Data\Managed\LabApi.dll'
+            if (-not $installed) { Write-Output "Install attempt $attempt did not complete; retrying..." }
+          }
+          if (-not $installed) { throw 'SCP:SL dedicated server files were not installed.' }
           New-Item -ItemType Directory -Force -Path 'D:\scpsl-refs' | Out-Null
           Copy-Item 'D:\scpsl-server\SCPSL_Data\Managed\*.dll' 'D:\scpsl-refs'
+
+      - name: Save SCP:SL reference cache
+        if: steps.refs-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: D:\scpsl-refs
+          key: ${{ env.REFS_CACHE_KEY }}
 
       - name: Restore
         run: dotnet restore
