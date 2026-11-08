@@ -3,6 +3,7 @@ using System;
 namespace CywApi;
 
 /// <summary>Framework-wide version constants and compatibility targets.</summary>
+/// <remarks>Requirements: CYWS-HLR-001, CYWS-CMP-002.</remarks>
 public static class CywVersion
 {
     /// <summary>Current framework version (single source of truth for the plugin metadata).</summary>

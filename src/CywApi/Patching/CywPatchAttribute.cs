@@ -7,6 +7,7 @@ namespace CywApi.Patching;
 /// discovered and applied by <see cref="CywPatcher"/>; the patch methods themselves
 /// keep using standard Harmony attributes ([HarmonyPatch], [HarmonyPrefix], ...).
 /// </summary>
+/// <remarks>Requirements: CYWS-PAT-001.</remarks>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class CywPatchAttribute : Attribute
 {

@@ -10,6 +10,7 @@ namespace CywApi;
 /// CYW's API plugin entry point.
 /// Loads before every other plugin (0-prefixed assembly name + <see cref="LoadPriority.Highest"/>).
 /// </summary>
+/// <remarks>Requirements: CYWS-HLR-001, CYWS-HLR-002.</remarks>
 public sealed class CywPlugin : Plugin<CywConfig>
 {
     /// <summary>Gets the single plugin instance.</summary>

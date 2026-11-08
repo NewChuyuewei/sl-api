@@ -3,6 +3,7 @@ using Xunit;
 
 namespace CywApi.Tests;
 
+[Trait("Req", "CYWS-LOG-002")]
 public sealed class AnsiColorParserTests
 {
     [Fact]
@@ -46,5 +47,26 @@ public sealed class AnsiColorParserTests
     public void StripCodes_Leaves_Unknown_Codes_Untouched()
     {
         Assert.Equal("&x", AnsiColorParser.StripCodes("&x"));
+    }
+
+    [Fact]
+    [Trait("Req", "CYWS-LOG-004")]
+    public void ToAnsi_Returns_Null_For_Null_Input()
+    {
+        Assert.Null(AnsiColorParser.ToAnsi(null));
+    }
+
+    [Fact]
+    [Trait("Req", "CYWS-LOG-004")]
+    public void StripCodes_Returns_Null_For_Null_Input()
+    {
+        Assert.Null(AnsiColorParser.StripCodes(null));
+    }
+
+    [Fact]
+    [Trait("Req", "CYWS-LOG-004")]
+    public void ToAnsi_Returns_Empty_For_Empty_Input()
+    {
+        Assert.Equal(string.Empty, AnsiColorParser.ToAnsi(string.Empty));
     }
 }

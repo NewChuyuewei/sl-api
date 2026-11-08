@@ -8,6 +8,7 @@ namespace CywApi.Modules;
 /// Checks the game version against the supported range and injects the framework version
 /// into the server's build-info output. Never aborts the framework on failure.
 /// </summary>
+/// <remarks>Requirements: CYWS-HLR-006, CYWS-CMP-001, CYWS-CMP-002, CYWS-CMP-003.</remarks>
 public sealed class CompatibilityModule : ICywModule
 {
     private const string BuildInfoLine = "CYW's API v" + CywVersion.Display;

@@ -12,6 +12,7 @@
 - 计划与任务清单：[`tasks/plan.md`](tasks/plan.md) / [`tasks/todo.md`](tasks/todo.md)
 - 本地测试服搭建（重要坑位手册）：[`docs/dev/test-server.md`](docs/dev/test-server.md)
 - 参考实现功能规格：[`docs/reference/labextended-feature-spec.md`](docs/reference/labextended-feature-spec.md)
+- 生命周期与质量（DO-178C 方法对标）：[`docs/lifecycle/`](docs/lifecycle/) + [`CONSTRAINTS.md`](CONSTRAINTS.md)
 
 ## 环境要求
 

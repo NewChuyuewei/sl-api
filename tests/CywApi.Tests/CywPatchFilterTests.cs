@@ -3,6 +3,7 @@ using Xunit;
 
 namespace CywApi.Tests;
 
+[Trait("Req", "CYWS-PAT-003")]
 public sealed class CywPatchFilterTests
 {
     [Theory]

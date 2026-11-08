@@ -8,10 +8,12 @@ namespace CywApi.Modules;
 /// Deterministic module registry: modules enable in descending priority order (stable) and
 /// disable in reverse order; a failing module is logged and does not stop the others.
 /// </summary>
+/// <remarks>Requirements: CYWS-HLR-005, CYWS-MOD-001, CYWS-MOD-002, CYWS-MOD-003, CYWS-MOD-004.</remarks>
 public static class CywModuleManager
 {
     private static readonly List<ICywModule> Registered = new();
     private static readonly List<ICywModule> EnabledModules = new();
+    private static bool _started;
 
     /// <summary>Gets the number of currently enabled modules.</summary>
     public static int EnabledCount => EnabledModules.Count;
@@ -21,6 +23,9 @@ public static class CywModuleManager
     {
         if (module == null)
             throw new ArgumentNullException(nameof(module));
+
+        if (_started)
+            throw new InvalidOperationException("Modules must be registered before EnableAll() is called.");
 
         foreach (var existing in Registered)
         {
@@ -34,6 +39,8 @@ public static class CywModuleManager
     /// <summary>Enables all registered modules (descending priority, stable within equal values).</summary>
     public static void EnableAll()
     {
+        _started = true;
+
         foreach (var module in Registered.OrderByDescending(m => m.Priority))
         {
             try
@@ -48,7 +55,7 @@ public static class CywModuleManager
             }
         }
 
-        CywLog.Info($"&7[modules] {EnabledModules.Count}/{Registered.Count} enabled");
+        CywLog.Info($"&7[modules] {EnabledCount}/{Registered.Count} enabled");
     }
 
     /// <summary>Disables all enabled modules in reverse enable order and clears the registry.</summary>
@@ -69,5 +76,6 @@ public static class CywModuleManager
 
         EnabledModules.Clear();
         Registered.Clear();
+        _started = false;
     }
 }

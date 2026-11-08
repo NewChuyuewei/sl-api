@@ -6,6 +6,7 @@ namespace CywApi.Core.Compatibility;
 /// Inclusive-minimum / exclusive-maximum version range helper.
 /// Pure logic — unit-tested off-server.
 /// </summary>
+/// <remarks>Requirements: CYWS-CMP-002.</remarks>
 public static class VersionRange
 {
     /// <summary>

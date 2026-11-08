@@ -165,4 +165,5 @@ M6 打磨与发布 ──▶ CP6: 发布清单全过 + 干净服务器验收 + v
 | LabExtended 公开 Wiki（规格参考） | https://github.com/marchellcx/LabExtended/wiki（Home / API 两页） |
 | LabAPI 官方 Wiki（权威文档） | https://github.com/northwood-studios/LabAPI/wiki |
 | 技能参考文件 | `.opencode/skills/scpsl-labapi/references/`（api-map / events-catalogue / wrappers-and-features）、`scpsl-plugin-dev/references/`（version-pins / decision-matrix） |
+| 生命周期与质量框架（DO-178C 对标） | `docs/lifecycle/`（需求/验证记录/CM/QA/工具置信度）、`CONSTRAINTS.md`（可机械检查护栏）、`AGENTS.md`（协作须知） |
 | 服务端实际安装路径（2026-11-08） | `E:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server`（`SL_REFERENCES` 指向其 `SCPSL_Data\Managed`）；LabAPI 部署目录 `%APPDATA%\SCP Secret Laboratory\LabAPI\{plugins,dependencies,configs}` |

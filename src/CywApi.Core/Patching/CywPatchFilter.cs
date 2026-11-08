@@ -7,6 +7,7 @@ namespace CywApi.Core.Patching;
 /// Evaluates patch-disable patterns against patch class names.
 /// Pure logic — unit-tested off-server.
 /// </summary>
+/// <remarks>Requirements: CYWS-PAT-003.</remarks>
 public static class CywPatchFilter
 {
     /// <summary>

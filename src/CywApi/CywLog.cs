@@ -8,6 +8,7 @@ namespace CywApi;
 /// Framework logger: gates debug output, renders optional ANSI colors and can prepend the
 /// source assembly name. All CYW's API code logs through this class.
 /// </summary>
+/// <remarks>Requirements: CYWS-HLR-003, CYWS-LOG-001, CYWS-LOG-003.</remarks>
 public static class CywLog
 {
     /// <summary>Writes a debug line — only when debugging is enabled in the config.</summary>
@@ -38,9 +39,9 @@ public static class CywLog
         var text = message ?? string.Empty;
 
         if (config != null && config.Log.UseColors)
-            text = AnsiColorParser.ToAnsi(text);
+            text = AnsiColorParser.ToAnsi(text) ?? string.Empty;
         else
-            text = AnsiColorParser.StripCodes(text);
+            text = AnsiColorParser.StripCodes(text) ?? string.Empty;
 
         if (config != null && config.Log.PrependSource)
         {

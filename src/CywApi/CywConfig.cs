@@ -7,19 +7,36 @@ namespace CywApi;
 /// A broken file falls back to these defaults with a loader warning; the framework must never
 /// fail to enable because of its config.
 /// </summary>
+/// <remarks>Requirements: CYWS-CFG-001, CYWS-CFG-004.</remarks>
 public sealed class CywConfig
 {
+    private LogSection _log = new();
+    private PatchSection _patches = new();
+    private CompatibilitySection _compatibility = new();
+
     /// <summary>Enables verbose debug logging.</summary>
     public bool Debug { get; set; } = false;
 
-    /// <summary>Logging options.</summary>
-    public LogSection Log { get; set; } = new();
+    /// <summary>Logging options. Never null — an explicit YAML null is replaced by defaults.</summary>
+    public LogSection Log
+    {
+        get => _log;
+        set => _log = value ?? new LogSection();
+    }
 
-    /// <summary>Patch manager options.</summary>
-    public PatchSection Patches { get; set; } = new();
+    /// <summary>Patch manager options. Never null — an explicit YAML null is replaced by defaults.</summary>
+    public PatchSection Patches
+    {
+        get => _patches;
+        set => _patches = value ?? new PatchSection();
+    }
 
-    /// <summary>Compatibility-check options.</summary>
-    public CompatibilitySection Compatibility { get; set; } = new();
+    /// <summary>Compatibility-check options. Never null — an explicit YAML null is replaced by defaults.</summary>
+    public CompatibilitySection Compatibility
+    {
+        get => _compatibility;
+        set => _compatibility = value ?? new CompatibilitySection();
+    }
 }
 
 /// <summary>Logging options.</summary>
@@ -35,11 +52,18 @@ public sealed class LogSection
 /// <summary>Patch manager options.</summary>
 public sealed class PatchSection
 {
+    private List<string> _disabled = new();
+
     /// <summary>
     /// Patch classes to skip when applying. Each entry is the full name or the short name of a
     /// [CywPatch] class; a trailing ".*" matches a whole namespace, e.g. "CywApi.Patches.*".
+    /// Never null — an explicit YAML null is replaced by an empty list.
     /// </summary>
-    public List<string> Disabled { get; set; } = new();
+    public List<string> Disabled
+    {
+        get => _disabled;
+        set => _disabled = value ?? new List<string>();
+    }
 }
 
 /// <summary>Compatibility-check options.</summary>

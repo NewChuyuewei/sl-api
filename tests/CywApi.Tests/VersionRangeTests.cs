@@ -4,6 +4,7 @@ using Xunit;
 
 namespace CywApi.Tests;
 
+[Trait("Req", "CYWS-CMP-002")]
 public sealed class VersionRangeTests
 {
     [Fact]

@@ -1,6 +1,7 @@
 # Deploys the CYW's API build output into the local LabAPI plugin folders (Windows).
 # Usage: powershell -File scripts\dev\deploy.ps1 [-Configuration Release]
 # NOTE: keep this file ASCII-only — Windows PowerShell 5.1 reads non-BOM .ps1 files as ANSI.
+# Requirements: CYWS-BLD-003.
 param(
     [string]$Configuration = 'Release'
 )

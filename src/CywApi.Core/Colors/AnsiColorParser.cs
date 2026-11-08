@@ -7,6 +7,7 @@ namespace CywApi.Core.Colors;
 /// Converts simple "&amp;x" color codes into ANSI escape sequences so framework logs can be
 /// colored in the game console. Pure logic — unit-tested off-server.
 /// </summary>
+/// <remarks>Requirements: CYWS-LOG-002, CYWS-LOG-004.</remarks>
 public static class AnsiColorParser
 {
     /// <summary>Character that introduces a color code.</summary>
@@ -35,11 +36,11 @@ public static class AnsiColorParser
 
     /// <summary>
     /// Converts known color codes to ANSI escapes; "&amp;&amp;" becomes a literal '&amp;'.
-    /// Unknown codes pass through unchanged.
+    /// Unknown codes pass through unchanged. Null/empty input is returned as-is.
     /// </summary>
-    public static string ToAnsi(string input)
+    public static string? ToAnsi(string? input)
     {
-        if (string.IsNullOrEmpty(input) || input.IndexOf(CodeChar) < 0)
+        if (string.IsNullOrEmpty(input) || input!.IndexOf(CodeChar) < 0)
             return input;
 
         var sb = new StringBuilder(input.Length + 16);
@@ -72,11 +73,11 @@ public static class AnsiColorParser
 
     /// <summary>
     /// Removes known color codes without inserting escapes
-    /// ("&amp;&amp;" still becomes a literal '&amp;').
+    /// ("&amp;&amp;" still becomes a literal '&amp;'). Null/empty input is returned as-is.
     /// </summary>
-    public static string StripCodes(string input)
+    public static string? StripCodes(string? input)
     {
-        if (string.IsNullOrEmpty(input) || input.IndexOf(CodeChar) < 0)
+        if (string.IsNullOrEmpty(input) || input!.IndexOf(CodeChar) < 0)
             return input;
 
         var sb = new StringBuilder(input.Length);
