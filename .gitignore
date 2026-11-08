@@ -12,3 +12,6 @@ obj/
 # OS
 Thumbs.db
 desktop.ini
+
+# 防御：意外下落到项目根目录的文档产物
+0CywApi.xml

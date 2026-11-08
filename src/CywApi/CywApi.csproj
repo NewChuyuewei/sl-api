@@ -16,7 +16,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>embedded</DebugType>
-    <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

@@ -226,7 +226,7 @@
 ## 进度日志
 
 - **2026-11-08**
-  - T0.1：服务端经 Steam 客户端装至 `E:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server`（LabApi 1.1.7.0 ✓）；实测服务器**不自带** 0Harmony/Newtonsoft。首次启动冒烟测试进行中。
+  - T0.1：服务端经 Steam 客户端装至 `E:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server`（LabApi 1.1.7.0 ✓）；实测服务器**不自带** 0Harmony/Newtonsoft；服务端已验证可稳定运行（详见 T0.4）。
   - T0.2：✅ 完成。`SL_REFERENCES` 指向该服务器 Managed。
   - T0.3：✅ 完成。`CywApi.slnx` + 3 项目；NuGet 切华为镜像（9MB/s）；全解决方案 Release 构建 0 警告 0 错误；Core 单测 1/1 通过。
   - T0.6：✅ 初版完成（`docs/reference/labextended-feature-spec.md`）。
