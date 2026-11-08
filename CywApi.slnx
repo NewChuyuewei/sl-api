@@ -1,9 +1,9 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/CywApi.Core/CywApi.Core.csproj" />
-    <Project Path="src/CywApi/CywApi.csproj" />
+  <Folder Name="/CYW.API/">
+    <Project Path="CYW.Plugins/CYW.API/src/CywApi.Core/CywApi.Core.csproj" />
+    <Project Path="CYW.Plugins/CYW.API/src/CywApi/CywApi.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/CywApi.Tests/CywApi.Tests.csproj" />
+    <Project Path="CYW.Plugins/tests/CywApi.Tests/CywApi.Tests.csproj" />
   </Folder>
 </Solution>

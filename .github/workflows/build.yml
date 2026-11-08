@@ -1,4 +1,4 @@
-name: Build
+name: Build & Package
 
 on:
   push:
@@ -54,16 +54,22 @@ jobs:
           key: ${{ env.REFS_CACHE_KEY }}
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore CywApi.slnx
 
       - name: Build
-        run: dotnet build -c Release --no-restore
+        run: dotnet build CywApi.slnx -c Release --no-restore
 
       - name: Test
-        run: dotnet test -c Release --no-build
+        run: dotnet test CywApi.slnx -c Release --no-build
 
-      - name: Upload artifact
+      - name: Package (one zip for all plugins)
+        shell: pwsh
+        run: |
+          & "CYW.Plugins/packaging.ps1" -SkipBuild
+
+      - name: Upload package
         uses: actions/upload-artifact@v7
         with:
-          name: cywapi
-          path: src/CywApi/bin/Release/net48/0CywApi.dll
+          name: cyw-plugins
+          path: CYW.Plugins/dist/CYW-Plugins.zip
+          if-no-files-found: error

@@ -96,6 +96,8 @@
 | F-005 | Nit | `CywModuleManager.EnabledCount` 未被使用 | ✅ 采纳：汇总日志改用该属性，消除未使用公开成员疑义 |
 | F-006 | FYI | `CywPatchFilter` 对 `"*"` 模式（不匹配任何类型）不作为通配符 | 📄 已在需求 LLR CYWS-PAT-003 明示匹配语法；保持现状 |
 | F-007 | Nit（流程） | 变异抽查恢复环节：增量构建因旧时间戳跳过重编译，复测跑在变异产物上（假红） | 🔧 流程加固：恢复后强制重建/touch；规则已写入 CONSTRAINTS.md 关键规则提醒 |
+| F-008 | **Critical（构建阻断）** | 目录名含撇号（`CYW's.Plugins`）劈断 MSBuild item-transform（`@(DocFileItem->'$(OutDir)...')` 的单引号被展开路径中的撇号截断）→ `MSB3021` 构建失败 | ✅ 已修复：全仓库目录去撇号（`CYW.Plugins` / `CYW.NameTag`），品牌名仅保留在显示元数据；规则写入 CONSTRAINTS.md |
+| F-009 | Required（脚本） | `deploy.ps1` 以数组 splat 传参，`-SkipBuild` 被位置绑定为 `Configuration` 值 → 打包失败 | ✅ 已修复：改为条件直接调用；执行演示复测（打包+解压落位）通过 |
 
 - **审查者**：AI 优化轮（作者与审查者同源，独立性受限已声明；人工评审为最终把关）
 - **结论**：4 项 Required 修复 + 1 项 Nit 采纳；修复均处于本优化轮内完成并回归（见 VR-007/VR-008/VR-009）。
@@ -135,3 +137,16 @@
 - **回归**：同批执行全量构建（警告清零后复验 0/0）、26/26 单测、部署脚本。
 - **映射**：CYWS-CFG-004（演示 ✅）、CYWS-PAT-006 / CYWS-MOD-004（实现 + 审查 + 本批回归）
 - **结论**：✅ 通过
+
+## VR-010 结构迁移（EXILED 对标整合）与打包链路（K2 执行演示）— 2026-11-08
+
+- **变更范围**：仓库根上移（`.git` / `.github` / `CywApi.slnx` / README / AGENTS / CONSTRAINTS 位于根）；全部产品迁入 `CYW.Plugins/`（对标 EXILED 的 `EXILED/` 产品目录模式）；新增 `Directory.Build.props`（共享属性 + **统一输出 `bin/<Configuration>`**）、`build.ps1`、`packaging.ps1`；CI 改为全量构建 + **单包 artifact**。
+- **命令与结果（本地实测）**：
+  - `dotnet build CywApi.slnx -c Release --no-incremental`（警告即错误）→ **0 警告 / 0 错误**
+  - `dotnet test CywApi.slnx -c Release --no-build` → **26/26 通过**（解决方案级运行 ✓）
+  - 共享输出目录（构建产物全集）：`0CywApi.dll` / `0CywApi.xml` / `0Harmony.dll` / `CywApi.Core.dll` / `CywApi.Core.xml`——无构建工具泄漏；publicizer 照常运行（`obj/…/publicized` 已生成，`ExcludeAssets=runtime` 未破坏其功能）
+  - `pwsh packaging.ps1 -SkipBuild` → `dist/CYW-Plugins.zip`（388 KB）：`plugins/global/0CywApi.dll` + `dependencies/global/{CywApi.Core.dll, 0Harmony.dll}` + `README-INSTALL.txt`
+  - `deploy.ps1 -SkipBuild` → 解压落位 `LabAPI\plugins\global` + `dependencies\global` ✓
+- **本批发现（执行演示捕获）**：F-008（撇号路径劈断 MSBuild，Critical，已修复）、F-009（deploy 参数绑定 bug，已修复）。
+- **映射**：CYWS-BLD-001/002/003/004、HLR-008（可复现环境）。CI 远端的全量绿灯将作为推送后的补充证据。
+- **结论**：✅ 通过（CI 远端复验后最终关闭）

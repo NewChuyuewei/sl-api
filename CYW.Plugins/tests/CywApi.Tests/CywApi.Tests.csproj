@@ -1,10 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <!-- Test project stays OUT of the shared product bin (see Directory.Build.props)
+         so build tooling and test infrastructure never leak into the release package. -->
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CywApi.Core\CywApi.Core.csproj" />
+    <ProjectReference Include="..\..\CYW.API\src\CywApi.Core\CywApi.Core.csproj" />
   </ItemGroup>
 
 </Project>

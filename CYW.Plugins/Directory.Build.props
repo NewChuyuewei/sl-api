@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  CYW's Plugins - shared build properties.
+  Mirrors EXILED's EXILED.props + Directory.Build.props approach:
+  every project under CYW.Plugins/ inherits these defaults and may override them
+  in its own .csproj.
+
+  Key points:
+  - All projects target net48 / x64 and share ONE output folder (bin/<Configuration>),
+    so packaging.ps1 can collect every plugin assembly from a single directory.
+  - Release is strict: warnings are errors and XML documentation is generated.
+  - Single project output: AppendTargetFrameworkToOutputPath=false removes the
+    "net48" subfolder; the test project overrides OutputPath to stay out of the
+    shared product bin.
+-->
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\</OutputPath>
+    <Version Condition="'$(Version)' == ''">0.1.0</Version>
+    <Authors>CYW</Authors>
+    <Company>CYW</Company>
+    <Product>CYW's Plugins</Product>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>embedded</DebugType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

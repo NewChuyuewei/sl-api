@@ -16,3 +16,12 @@ desktop.ini
 
 # 防御：意外下落到项目根目录的文档产物
 0CywApi.xml
+opencode.json
+
+# 工作区工具（不属于产品，不进入公开仓库）
+.opencode/
+.mcp.json
+example/
+
+# 打包输出
+CYW.Plugins/dist/c

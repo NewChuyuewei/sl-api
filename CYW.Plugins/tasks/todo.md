@@ -250,3 +250,10 @@
   - **CI 首跑失败修复**（同日）：根因=steamcmd 首次运行仅自举自我更新、链式指令未执行 → refs 目录缺失；次要隐患=失败时可能把空 refs 目录缓存。修复：工作流改为「先自举一次 → 安装循环 + `LabApi.dll` 存在性验证（3 次重试）→ 缓存 restore/save 分离 + key 升级 `v2`」。
   - **CI 修复验证通过**：run #2（commit `823944d`）**全绿**（104 秒：服务端拉取 + 缓存保存 + 构建 + 26 单测 + artifact 上传）；修复前 run #1 的失败已成为历史。远端仓库：`github.com/NewChuyuewei/sl-api`（public）。
   - **Action 版本升级**（消除 Node20 弃用警告）：`checkout@v7` / `setup-dotnet@v6` / `cache(restore|save)@v6` / `upload-artifact@v7`（以 GitHub API 查得的最新主版本为准）；推送后由 run #3 验证（同时验证缓存命中路径）。
+- **2026-11-08（EXILED 对标整合版仓库）**
+  - 仓库根上移（`.git`/`.github`/`CywApi.slnx`/README/AGENTS/CONSTRAINTS 位于根）；全部产品归入 `CYW.Plugins/`（对标 EXILED 的 `EXILED/` 产品目录）。
+  - **重命名 `CYW's.Plugins` → `CYW.Plugins`、`CYW's.NameTag` → `CYW.NameTag`**：发现 F-008——撇号路径劈断 MSBuild item-transform（`MSB3021` 实锤），目录名从此禁止撇号（规则入 CONSTRAINTS）。
+  - 新增（对标 EXILED）：`Directory.Build.props`（共享属性 + 统一输出 `bin/<Configuration>` + Release 警告即错误）、`build.ps1`、`packaging.ps1`（**一个 zip 解压即部署**）、`PLUGINS.md`（15 个工程分级注册表）、14 个 `.gitkeep`。
+  - `deploy.ps1` 重写为"打包 + 解压"单一真相源（修复 F-009 参数绑定 bug）。
+  - CI 改为：全量构建（警告即错误）→ 26 单测 → `packaging.ps1` → 单包 artifact `cyw-plugins`。
+  - 本地全链路验证 ✅：构建 0/0、26/26、zip 内容正确（plugins:1 / deps:2）、解压落位正确。

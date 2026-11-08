@@ -19,11 +19,12 @@
 | 维度 | 规则 | 检查命令 | 运行时机 |
 |---|---|---|---|
 | 构建 | 0 警告 0 错误 | `dotnet build CywApi.slnx -c Release --no-incremental` | 每次改动 |
-| 单元测试 | 全部通过且数量不得下降（当前 **26**） | `dotnet test tests\CywApi.Tests -c Release` | 每次改动 |
+| 单元测试 | 全部通过且数量不得下降（当前 **26**） | `dotnet test "CYW.Plugins/tests/CywApi.Tests" -c Release` | 每次改动 |
 | Core 行覆盖率 | 不得低于实测（当前 **100%**，81/81） | `dotnet test ... --collect:"XPlat Code Coverage"` + 解析 cobertura | 任务结束 |
 | Core 分支覆盖率 | 不得低于实测（当前 **97.05%**，66/68） | 同上 | 任务结束 |
 | 依赖漏洞（外部） | 无 High/Critical | `dotnet list CywApi.slnx package --vulnerable --include-transitive` | 发布前/CI |
-| 实机演示（外部） | 每个基线必须有真实服务器演示证据 | `LocalAdmin` 冒烟流程（见 `docs/dev/test-server.md`） | 每个检查点 |
+| 实机演示（外部） | 每个基线必须有真实服务器演示证据 | `LocalAdmin` 冒烟流程（见 `CYW.Plugins/docs/dev/test-server.md`） | 每个检查点 |
+| 发布包 | 每个基线产出一个可部署 zip | `pwsh "CYW.Plugins/packaging.ps1"` → `dist/CYW-Plugins.zip` | 每个检查点 |
 | 测试有效性 | 每轮优化至少一次变异抽查（注入缺陷必须变红） | 变异→TRX 计数→恢复→**强制重建**→复测 | 每轮优化 |
 
 > 环境前置：`$env:SL_REFERENCES = '<服务端>\SCPSL_Data\Managed'`
@@ -47,4 +48,5 @@
 ## 关键规则提醒
 
 - **变异恢复必须强制重建**：MSBuild 增量构建会因恢复文件的旧时间戳跳过重编译，导致复测跑在变异产物上（假红/假绿）——恢复后执行 `dotnet build --no-incremental` 或 touch 源文件（发现 F-007）。
+- **目录/文件名禁止撇号、引号与特殊字符**：路径中的撇号会劈断 MSBuild item-transform（`@(X->'$(OutDir)...')` 单引号被截断）导致 `MSB3021` 构建失败（发现 F-008 实锤）；品牌名放显示元数据，不放路径。
 - **工具输出均为辅助证据**；最终验收判定 = 目标环境（真实服务器）演示。

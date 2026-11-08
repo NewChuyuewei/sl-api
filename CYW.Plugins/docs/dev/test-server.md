@@ -57,8 +57,8 @@ LocalAdmin 实际传给 `SCPSL.exe` 的参数（官方格式，供参考）：
 ## 5. 开发循环
 
 ```
-1. dotnet build -c Release
-2. scripts\dev\deploy.ps1          # 部署到 LabAPI\plugins\global + dependencies\global
+1. pwsh "CYW.Plugins/build.ps1"                              # 还原 + Release 构建 + 单测
+2. powershell -File "CYW.Plugins/scripts/dev/deploy.ps1"     # 打包一个 zip + 解压到本机 LabAPI
 3. 启动 LocalAdmin（上文命令）
 4. 冒烟检查：
    - 日志出现 "[LOADER] Enabling all plugins"
