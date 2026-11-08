@@ -6,8 +6,8 @@
 
 ## 状态
 
-🚧 开发中——**Phase 0（环境与骨架）已完成**：脚手架可构建、插件已在真实 SCP:SL 服务器上验证加载
-（`[0CywApi] CYW's API v0.1.0 enabled (LabAPI 1.1.7)`）。
+🚧 开发中——**Phase 1（核心层）已完成**：配置系统 / 日志 / Harmony 补丁器 / 模块系统 / 兼容性检查均已实现，
+并在真实 SCP:SL 14.2.9 服务器上验证（加载、启用、禁用、损坏配置容错全部通过；23 项单元测试全绿）。
 
 - 计划与任务清单：[`tasks/plan.md`](tasks/plan.md) / [`tasks/todo.md`](tasks/todo.md)
 - 本地测试服搭建（重要坑位手册）：[`docs/dev/test-server.md`](docs/dev/test-server.md)

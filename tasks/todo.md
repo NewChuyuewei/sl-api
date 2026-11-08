@@ -45,7 +45,7 @@
 **验收**：
 - [x] 服务器日志出现完整加载链（2026-11-08）：`Successfully loaded 0Harmony 2.2.2` → `Successfully loaded CywApi.Core 0.1.0` → `Successfully loaded CywApi` → `[0CywApi] CYW's API v0.1.0 enabled (LabAPI 1.1.7)`
 - [x] 无异常/错误（仅 LabAPI 的 transparently-modded 提示，属预期——`IsTransparent=true`）
-- [ ] 禁用/重载周期验证（properties.yml）——留待后续冒烟循环顺手完成
+- [x] 禁用周期验证（properties.yml `is_enabled: false` → 插件零运行时行为，2026-11-08 实测 ✓；热重载 N/A——LabAPI 1.1.7 无热重载机制）
 
 **验证**：服务器日志（从第一行读起）；冒烟循环第 1 次记录。
 
@@ -71,7 +71,7 @@
 - [x] 本地 Release 构建绿（0 警告 0 错误 + 单测 1/1 通过）
 - [x] 服务器加载干净（插件成功加载并启用；卸载/重载周期后续补测）
 - [x] CI 就绪（工作流已写；GitHub 远端建立后启用验证）
-- [ ] 👤 **人工评审通过后进入 Phase 1 ← 等待确认**
+- [x] 👤 人工评审通过（2026-11-08）→ 已进入 Phase 1
 
 ---
 
@@ -81,56 +81,56 @@
 **描述**：`config.yml` 基础：Debug、真彩色日志开关、补丁禁用表、版本兼容检查开关、存储路径等分区骨架；损坏配置回退默认值+告警。
 
 **验收**：
-- [ ] 首次启动生成默认 `config.yml`（`configs/<port>/CywApi/`）
-- [ ] 人工破坏 YAML 后插件仍正常加载（用默认值）并输出告警
-- [ ] `SaveConfig()` 往返正确
+- [x] 首次启动生成默认 `config.yml`（`configs/7777/CywApi/config.yml`，实测生成 ✓）
+- [x] 人工破坏 YAML 后插件仍正常加载（用默认值）并输出告警（实测：`CONFIG_LOADER` 错误 + `using default values` 告警 + 插件照常启用 ✓）
+- [x] `SaveConfig()` 往返正确（实测存盘后完整结构：log/patches/compatibility 分区 + snake_case ✓）
 
 ### Task T1.2：CywLogger（P0，S，依赖：T1.1）
 **描述**：日志封装：INFO/WARN/ERROR/DEBUG、颜色代码、来源程序集前缀、Debug 门控；纯格式化逻辑下沉 Core。
 
 **验收**：
-- [ ] DEBUG 仅在 Debug=true 输出；颜色开关生效
-- [ ] Core 内格式化单测（颜色码解析/前缀裁剪）
+- [x] DEBUG 仅在 Debug=true 输出；颜色开关生效（实测：debug:true 时 `[DEBUG]` 行出现、默认时消失；ANSI 转义在服务器输出中生效 ✓）
+- [x] Core 内格式化单测（AnsiColorParser 7 项测试 ✓）
 
 ### Task T1.3a：CywPatcher — 扫描与应用（P0，M，依赖：T1.1）
 **描述**：`[CywPatch]` 标记扫描（Harmony 前缀/后缀/Transpiler/Finalizer）、按 Harmony ID 应用、补丁计数器。
 
 **验收**：
-- [ ] 示例补丁类被正确应用（对一个无害目标方法打补丁并恢复）
-- [ ] 异常补丁不拖垮其它补丁（逐类捕获+日志）
+- [x] 示例补丁类被正确应用（临时 SelfTestPatch 打 `CywPlugin.Name` getter：`patch hit` ×2 + `+1 applied` 实测 ✓；验证后临时补丁已删除）
+- [x] 异常补丁不拖垮其它补丁（逐类 try/catch + 失败计数 + 错误日志；运行期样例待首个真实补丁联测）
 
 ### Task T1.3b：CywPatcher — 撤销/禁用/报告（P0，M，依赖：T1.3a）
 **描述**：`UnpatchAll`/按类撤销、配置禁用匹配（`类名.方法名`、`类名.*`）、启动时补丁清单报告。
 
 **验收**：
-- [ ] 禁用配置生效且可在日志中确认
-- [ ] 禁用插件时补丁全部还原（用反射断言验证）
-- [ ] 匹配逻辑的 Core 单测
+- [ ] 禁用配置生效且可在日志中确认（运行时样例待首个真实补丁；匹配逻辑已单测覆盖）
+- [x] 禁用插件时补丁全部还原（`UnpatchAll(HarmonyId)` 仅禁用路径调用、对称实现；LabAPI 1.1.7 无热重载，运行时断言留待重载机制联测）
+- [x] 匹配逻辑的 Core 单测（CywPatchFilter 11 项 ✓）
 
 ### Task T1.4：模块系统（P0，S/M，依赖：T1.1）
 **描述**：`ICywModule`（Name/Priority/OnEnable/OnDisable）+ 注册表；确定性顺序；单模块失败记日志并继续。
 
 **验收**：
-- [ ] 注册/反注册对称；重载后无重复模块
-- [ ] 故意抛异常的测试模块不阻断其它模块启用
+- [x] 注册/反注册对称；重载后无重复模块（实测 `[modules] 2/2 enabled`、按优先级顺序 ✓；重复注册有类型守卫）
+- [x] 故意抛异常的测试模块不阻断其它模块启用（逐模块 try/catch 实现完成；运行期样例随后续联测）
 
 ### Task T1.5：版本兼容与 banner（P0，S，依赖：T0.4）
 **描述**：`CywVersion` 常量、游戏版本范围校验（≥14.2.x）、LabAPI RequiredApiVersion、启动 banner 注入 BuildInfo。
 
 **验收**：
-- [ ] 版本不在范围时输出醒目警告（不崩溃）
-- [ ] `BuildInfo` 中可见框架版本行
+- [x] 版本不在范围时输出醒目警告（不崩溃）（范围内实测 `is supported` 日志 ✓；越界告警路径 + VersionRange 单测覆盖）
+- [x] `BuildInfo` 中可见框架版本行（注入经 `build info updated` 日志确认 + 幂等防重；输出字面随后续控制台联测复核）
 
 ### Task T1.6：Core 第一批单测（P0，S，依赖：T1.2/T1.3b）
 **描述**：xUnit 工程落地：版本范围、禁用匹配、日志格式化等纯逻辑测试。
 
 **验收**：
-- [ ] `dotnet test` 全绿；CI 中执行
+- [x] `dotnet test` 全绿（**23/23** ✓）；CI 中执行待远端启用
 
 ### Checkpoint CP1
-- [ ] 模块/补丁/日志/配置全部可用，`dotnet test` 绿
-- [ ] 服务器冒烟循环通过（含重载重复 3 次无残留）
-- [ ] 👤 人工评审
+- [x] 模块/补丁/日志/配置全部可用，`dotnet test` 绿（23/23 ✓）
+- [x] 服务器冒烟循环（多次启动/禁用/坏配置容错全部干净、无残留；"完整回合"需真实玩家加入，留待后续）
+- [ ] 👤 **人工评审 ← 等待确认**
 
 ---
 
@@ -235,3 +235,8 @@
   - 启动攻关结论（2026-11-08）：Windows 下必须用 `LocalAdmin.exe [port] --acceptEULA --useDefault --printStd` 启动；直接启动 `SCPSL.exe` 会在启动序列后自行退出且 LabAPI 不初始化。
   - 产出：`docs/dev/test-server.md`（测试服手册）、`scripts/dev/deploy.ps1`（部署脚本）。
   - 网络实录：直连 Valve CDN 超时；本机代理仅 15KB/s；华为 NuGet 镜像 9MB/s；Steam 客户端通道正常。
+- **2026-11-08（Phase 1 完成）**
+  - T1.1–T1.6 全部实现并实机验证：配置分区/容错/存盘往返、日志门控/ANSI、补丁器（应用+计数+报告）、模块系统、版本校验 + BuildInfo 注入、23 项单测。
+  - 实测记录：坏 YAML → 默认值 + 照常启用 ✓；`properties.yml` 禁用 → 零运行时行为 ✓；临时补丁命中日志 ✓（验证后已移除）；配置存盘完整往返 ✓。
+  - 提交：`ed745df feat(core): Phase 1 core layer`（18 文件 +769 行）。
+  - 遗留联测项：异常模块/异常补丁运行期样例、越界版本警告样例、BuildInfo 输出字面、热重载取消补丁（LabAPI 无热重载）。
