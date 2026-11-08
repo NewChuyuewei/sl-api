@@ -1,0 +1,237 @@
+# 任务清单：CYW's API
+
+> 配套计划：`tasks/plan.md`
+> 图例：P0/P1/P2/P3 = 优先级；S/M/L = 规模（1-2 / 3-5 / 5+ 文件）
+> Phase 0–2 已细化；Phase 3+ 滚动细化（见计划 §5.3）
+
+---
+
+## Phase 0：环境与骨架
+
+### Task T0.1：服务端文件获取（P0，S，依赖：无）✅
+**描述**：~~steamcmd 匿名下载~~ → 实际改经 **Steam 客户端**安装专用服务器到 `E:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server`（Valve CDN 直连超时所致，见进度日志）。
+
+**验收**：
+- [x] `SCPSL_Data\Managed\LabApi.dll` 存在（**1.1.7.0** ✓）
+- [x] 关键 DLL 版本已记录：LabApi 1.1.7.0；**0Harmony/Newtonsoft 服务器不自带**（Harmony 由插件自带，采用 Lib.Harmony 2.2.2）
+- [x] 服务端可启动：经 `LocalAdmin.exe 7777 --acceptEULA --useDefault --printStd` 完整启动并稳定运行（2026-11-08 验证）
+
+**验证**：`Test-Path` 检查 + `(Get-Item <dll>).VersionInfo`；启动服务端读日志头部。
+**备选方案**：Steam 客户端"库→工具"安装；或用户提供 Managed 文件夹路径。
+
+### Task T0.2：构建引用环境变量（P0，S，依赖：T0.1）
+**描述**：设置用户级环境变量 `SL_REFERENCES=D:\SCPSL-Server\SCPSL_Data\Managed`；新终端生效。
+
+**验收**：
+- [x] 用户级 `SL_REFERENCES` 已写入注册表（指向 Steam 安装的专用服务器 `SCPSL_Data\Managed`）
+- [x] 路径下存在 `Assembly-CSharp.dll`、`LabApi.dll`（1.1.7.0）、`Mirror.dll`、各 UnityEngine 模块（2026-11-08 验证）
+
+**验证**：`echo $env:SL_REFERENCES` + `Test-Path` 清单核对。
+
+### Task T0.3：仓库骨架与 build spike（P0，M，依赖：T0.2）
+**描述**：在 `CYW's API/` 建立 `CywApi.sln` + 三个项目（`CywApi` 插件 / `CywApi.Core` 纯逻辑 / `CywApi.Tests`），配好 net48、`Publicize="true"` 引用、NuGet（Lib.Harmony 对齐服务器版本、Newtonsoft.Json 13.x、BepInEx.AssemblyPublicizer.MSBuild）；`git init`（待确认）。
+
+**验收**：
+- [x] `dotnet build -c Release` 全绿（net48）——2026-11-08 全解决方案 0 警告 0 错误；**构建期 publicize 方案验证通过**
+- [x] 产物 DLL 生成（AssemblyName=0CywApi）
+- [x] Core 项目无任何游戏/LabAPI/Unity 引用（引用清单核对）
+
+**验证**：构建命令输出；`dotnet list package`；csproj 评审。
+**备注**：这是"构建期 publicize 原始 DLL"方案的验证点；若失败，改用脚本预生成 publicized 变体。
+
+### Task T0.4：最小插件入口 + 服务器加载冒烟（P0，S，依赖：T0.3）
+**描述**：`CywPlugin` 入口：`Name="CywApi"`、`LoadPriority.Highest`、`Enable/Disable` 对称、启动 banner 日志（版本+LabAPI 版本）。
+
+**验收**：
+- [x] 服务器日志出现完整加载链（2026-11-08）：`Successfully loaded 0Harmony 2.2.2` → `Successfully loaded CywApi.Core 0.1.0` → `Successfully loaded CywApi` → `[0CywApi] CYW's API v0.1.0 enabled (LabAPI 1.1.7)`
+- [x] 无异常/错误（仅 LabAPI 的 transparently-modded 提示，属预期——`IsTransparent=true`）
+- [ ] 禁用/重载周期验证（properties.yml）——留待后续冒烟循环顺手完成
+
+**验证**：服务器日志（从第一行读起）；冒烟循环第 1 次记录。
+
+### Task T0.5：CI 工作流（P0，S，依赖：T0.3）
+**描述**：`.github/workflows/build.yml`：ubuntu-latest + steamcmd 匿名下载 + build Release + 上传 artifact；先落地本地，远端建立后启用。
+
+**验收**：
+- [ ] YAML 语法通过（本地校验）
+- [ ] （远端就绪后）一次绿色运行，artifact 含 `0CywApi.dll`
+
+**验证**：workflow 运行记录；artifact 下载检查。
+
+### Task T0.6：参考规格沉淀（P0，M，依赖：无，可并行）
+**描述**：依据盘点报告整理 `docs/reference/labextended-feature-spec.md`：子系统清单、行为描述、补丁目标（方法名级别的**事实信息**）、已知坑与耦合点。作为重写规格；不含任何源码文本复制。
+
+**验收**：
+- [x] 覆盖 §5.2 全表 + 92 补丁文件的目标方法清单（2026-11-08 完成初版）
+- [x] 明确标注"行为参考，非代码复制"纪律
+
+**验证**：与盘点报告交叉核对；计划修订时回填引用。
+
+### Checkpoint CP0
+- [x] 本地 Release 构建绿（0 警告 0 错误 + 单测 1/1 通过）
+- [x] 服务器加载干净（插件成功加载并启用；卸载/重载周期后续补测）
+- [x] CI 就绪（工作流已写；GitHub 远端建立后启用验证）
+- [ ] 👤 **人工评审通过后进入 Phase 1 ← 等待确认**
+
+---
+
+## Phase 1：核心层
+
+### Task T1.1：CywConfig（P0，S，依赖：T0.4）
+**描述**：`config.yml` 基础：Debug、真彩色日志开关、补丁禁用表、版本兼容检查开关、存储路径等分区骨架；损坏配置回退默认值+告警。
+
+**验收**：
+- [ ] 首次启动生成默认 `config.yml`（`configs/<port>/CywApi/`）
+- [ ] 人工破坏 YAML 后插件仍正常加载（用默认值）并输出告警
+- [ ] `SaveConfig()` 往返正确
+
+### Task T1.2：CywLogger（P0，S，依赖：T1.1）
+**描述**：日志封装：INFO/WARN/ERROR/DEBUG、颜色代码、来源程序集前缀、Debug 门控；纯格式化逻辑下沉 Core。
+
+**验收**：
+- [ ] DEBUG 仅在 Debug=true 输出；颜色开关生效
+- [ ] Core 内格式化单测（颜色码解析/前缀裁剪）
+
+### Task T1.3a：CywPatcher — 扫描与应用（P0，M，依赖：T1.1）
+**描述**：`[CywPatch]` 标记扫描（Harmony 前缀/后缀/Transpiler/Finalizer）、按 Harmony ID 应用、补丁计数器。
+
+**验收**：
+- [ ] 示例补丁类被正确应用（对一个无害目标方法打补丁并恢复）
+- [ ] 异常补丁不拖垮其它补丁（逐类捕获+日志）
+
+### Task T1.3b：CywPatcher — 撤销/禁用/报告（P0，M，依赖：T1.3a）
+**描述**：`UnpatchAll`/按类撤销、配置禁用匹配（`类名.方法名`、`类名.*`）、启动时补丁清单报告。
+
+**验收**：
+- [ ] 禁用配置生效且可在日志中确认
+- [ ] 禁用插件时补丁全部还原（用反射断言验证）
+- [ ] 匹配逻辑的 Core 单测
+
+### Task T1.4：模块系统（P0，S/M，依赖：T1.1）
+**描述**：`ICywModule`（Name/Priority/OnEnable/OnDisable）+ 注册表；确定性顺序；单模块失败记日志并继续。
+
+**验收**：
+- [ ] 注册/反注册对称；重载后无重复模块
+- [ ] 故意抛异常的测试模块不阻断其它模块启用
+
+### Task T1.5：版本兼容与 banner（P0，S，依赖：T0.4）
+**描述**：`CywVersion` 常量、游戏版本范围校验（≥14.2.x）、LabAPI RequiredApiVersion、启动 banner 注入 BuildInfo。
+
+**验收**：
+- [ ] 版本不在范围时输出醒目警告（不崩溃）
+- [ ] `BuildInfo` 中可见框架版本行
+
+### Task T1.6：Core 第一批单测（P0，S，依赖：T1.2/T1.3b）
+**描述**：xUnit 工程落地：版本范围、禁用匹配、日志格式化等纯逻辑测试。
+
+**验收**：
+- [ ] `dotnet test` 全绿；CI 中执行
+
+### Checkpoint CP1
+- [ ] 模块/补丁/日志/配置全部可用，`dotnet test` 绿
+- [ ] 服务器冒烟循环通过（含重载重复 3 次无残留）
+- [ ] 👤 人工评审
+
+---
+
+## Phase 2：玩家与事件层
+
+### Task T2.1：CywPlayer 注册表 + 构造替换补丁（P0，M，依赖：CP1）
+**描述**：`CywPlayer : Player` 骨架 + `Players/Npcs/All` 注册表 + 构造/移除补丁（替换 LabAPI Player 实例化）+ 释放清理 + 静态查询（Get/ByUserId/TryGet…）。
+
+**验收**：
+- [ ] 进服后 `CywPlayer.Get/All` 可见该玩家；退服后移除
+- [ ] 加载/重载后 instanceof 判定正确（外部拿到的 Player 即 CywPlayer）
+- [ ] 无空引用异常（断线竞态防护）
+
+### Task T2.2a：CywPlayer 容器 — 角色/背包基础（P0，M，依赖：T2.1）
+**描述**：`RoleContainer`（角色/血量基础）、`InventoryContainer`（物品基础）最小实现，挂接生命周期清理。
+
+**验收**：
+- [ ] 角色变更事件后容器数据一致；退服清理无泄漏
+
+### Task T2.2b：CywPlayer 容器 — 位置/旋转/效果基础（P0，M，依赖：T2.1）
+**描述**：`PositionContainer`/`RotationContainer`/`EffectContainer`（基础查询与开关）。
+
+**验收**：
+- [ ] 位置读写、效果开关冒烟通过（RA 命令或临时调试输出验证）
+
+### Task T2.3：事件桥 InternalEvents（P0，M，依赖：T2.1）
+**描述**：`CustomEventsHandler` 注册：认证/验证/加入/离开/生成/角色变更/回合（开/结束/重启）/服务器事件；维护内部状态（UserId→Region 等）。
+
+**验收**：
+- [ ] 事件按预期顺序触发（加入→验证→生成→…）；记录日志序列核对
+- [ ] 重载后无重复订阅（同一事件只触发一次）
+
+### Task T2.4：Cyw 事件系统（P0，M，依赖：T2.3）
+**描述**：`CywEvents.*` 静态事件 + `CywEventArgs`/`BooleanEventArgs`（IsAllowed）+ `InvokeSafe` 异常隔离；首批事件集（玩家 Joined/Left/Verified/Spawned/ChangedRole/Died 等 + 回合/服务器）。
+
+**验收**：
+- [ ] 依赖方插件可订阅并取消（BooleanEventArgs 示例验证）
+- [ ] 订阅者抛异常不影响其它订阅者与主流程
+
+### Task T2.5：玩家更新循环 `[CywPlayerUpdate]`（P0，S/M，依赖：T2.1）
+**描述**：扫描特性注册每玩家 tick（参考 PlayerUpdateHelper），统一组件驱动；启停对称。
+
+**验收**：
+- [ ] 示例 update 每秒正确回调；禁用后停止；重载不重复
+
+### Checkpoint CP2
+- [ ] 冒烟：进服→CywPlayer 可见→事件序正确→退服清理→重载无重复
+- [ ] 👤 人工评审
+
+---
+
+## Phase 3+（滚动细化，进入时拆分为 T 级任务）
+
+### Phase 3：命令框架（P0）
+- [ ] 3.1 命令注册与调度（`[CywCommand]` 扫描、`CywCommandManager`、`RegisterAssembly`）
+- [ ] 3.2 参数解析器：基础（字符串/数字/布尔/枚举/时间）
+- [ ] 3.3 参数解析器：复杂（玩家/向量/颜色/射线/集合）
+- [ ] 3.4 限制器（数值范围/枚举白黑名单/字符串长度/玩家精度）
+- [ ] 3.5 Runner（同步/异步/协程/续命令）
+- [ ] 3.6 嵌套命令组 + 权限节点集成（LabAPI Permissions）
+- [ ] 3.7 三面接入（RA / 客户端控制台 / 服务器控制台）+ RA 命令表注入
+- [ ] 3.8 内置命令组骨架（后续随内容子系统补齐）
+- [ ] CP3：RA+客户端命令可用
+
+### Phase 4：自定义内容（P1）
+- [ ] 4a 自定义物品基类+序列级跟踪器 → 枪械 → 投掷物
+- [ ] 4b 自定义角色 → 自定义队伍 → 分波角色选择算法
+- [ ] 4c 自定义效果（含 tick/时长变体）→ 能力 → 弹药
+- [ ] 4d 游戏模式基类
+- [ ] CP4a/b/c 各自冒烟验收
+
+### Phase 5：呈现与交互（P1/P2/P3）
+- [ ] 5a Hints 叠层（控制器/元素/图片/拦截补丁）
+- [ ] 5b Settings API
+- [ ] 5c RemoteAdmin API（最脆弱补丁组，慎重）
+- [ ] 5d Toys/Prefabs/电梯/特斯拉/地图/相机包装
+- [ ] 5e 语音/音频（P3，可裁剪）
+
+### Phase 6：打磨与发布
+- [ ] 6.1 修复类补丁按需移植（如客户端自定义命令修复）
+- [ ] 6.2 文档：README / API XML / 使用教程
+- [ ] 6.3 示例插件（examples/）
+- [ ] 6.4 发布清单核对（技能 scpsl-migration-release 的 release-checklist）
+- [ ] 6.5 v0.1 公开发布
+
+---
+
+## 备注
+- 每完成一个任务立即勾选并在会话中汇报；检查点须人工确认后再前进。
+- 任何任务发现规模超预期时：暂停→拆分→更新本文件。
+- 服务器冒烟循环（固定动作）：`启动 → 插件加载 → 完整回合 → 重载 ×3 → 禁用 → 读日志从第一行起`。
+
+## 进度日志
+
+- **2026-11-08**
+  - T0.1：服务端经 Steam 客户端装至 `E:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server`（LabApi 1.1.7.0 ✓）；实测服务器**不自带** 0Harmony/Newtonsoft。首次启动冒烟测试进行中。
+  - T0.2：✅ 完成。`SL_REFERENCES` 指向该服务器 Managed。
+  - T0.3：✅ 完成。`CywApi.slnx` + 3 项目；NuGet 切华为镜像（9MB/s）；全解决方案 Release 构建 0 警告 0 错误；Core 单测 1/1 通过。
+  - T0.6：✅ 初版完成（`docs/reference/labextended-feature-spec.md`）。
+  - T0.4：✅ 完成。2026-11-08 12:06 复测日志确认完整加载链：`0Harmony 2.2.2` + `CywApi.Core 0.1.0` 依赖加载 → `CywApi` 插件加载 → `[0CywApi] CYW's API v0.1.0 enabled (LabAPI 1.1.7)`，服务器稳定运行（180s+ 无异常）。
+  - **CP0 达成**（除人工评审）：环境、骨架、构建、部署、加载全链路当日打通；git 仓库已初始化并完成初始提交。
+  - 启动攻关结论（2026-11-08）：Windows 下必须用 `LocalAdmin.exe [port] --acceptEULA --useDefault --printStd` 启动；直接启动 `SCPSL.exe` 会在启动序列后自行退出且 LabAPI 不初始化。
+  - 产出：`docs/dev/test-server.md`（测试服手册）、`scripts/dev/deploy.ps1`（部署脚本）。
+  - 网络实录：直连 Valve CDN 超时；本机代理仅 15KB/s；华为 NuGet 镜像 9MB/s；Steam 客户端通道正常。

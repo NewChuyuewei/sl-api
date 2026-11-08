@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  SL_REFERENCES: D:\scpsl-refs
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache SCP:SL reference DLLs
+        id: refs-cache
+        uses: actions/cache@v4
+        with:
+          path: D:\scpsl-refs
+          key: scpsl-refs-996560-v1
+
+      - name: Fetch SCP:SL dedicated server (cache miss)
+        if: steps.refs-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip' -OutFile 'D:\steamcmd.zip'
+          Expand-Archive -Path 'D:\steamcmd.zip' -DestinationPath 'D:\steamcmd' -Force
+          & 'D:\steamcmd\steamcmd.exe' +force_install_dir 'D:\scpsl-server' +login anonymous +app_update 996560 validate +quit
+          New-Item -ItemType Directory -Force -Path 'D:\scpsl-refs' | Out-Null
+          Copy-Item 'D:\scpsl-server\SCPSL_Data\Managed\*.dll' 'D:\scpsl-refs'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
+
+      - name: Test
+        run: dotnet test -c Release --no-build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cywapi
+          path: src/CywApi/bin/Release/net48/0CywApi.dll
