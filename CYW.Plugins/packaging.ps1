@@ -1,18 +1,21 @@
 #! pwsh
 # CYW's Plugins - packaging script (mirrors EXILED's packaging.ps1 idea).
-# Builds the whole solution and packages ALL plugins into ONE ready-to-extract zip
-# that mirrors the LabAPI folder layout:
+# Builds the whole solution and packages ALL plugins into ONE ready-to-extract layout
+# that mirrors the LabAPI folder structure:
 #
 #   plugins/global/        plugin assemblies
 #   dependencies/global/   shared dependency assemblies (0Harmony, *.Core, ...)
 #   README-INSTALL.txt     install instructions
 #
+# Output (both kept, folder is the source of truth):
+#   dist/release/          the extract-once folder (also uploaded as CI artifact so the
+#                          downloaded artifact is a SINGLE zip containing these files)
+#   dist/CYW-Plugins.zip   distribution copy (user downloads / releases)
+#
 # Usage:
 #   pwsh packaging.ps1               # build + package
 #   pwsh packaging.ps1 -SkipBuild    # package only (artifacts already built, e.g. CI)
 #   pwsh packaging.ps1 -Configuration Debug
-#
-# Output: dist/CYW-Plugins.zip
 #
 # NOTE: keep this file ASCII-only - Windows PowerShell 5.1 reads non-BOM .ps1
 # files as ANSI and non-ASCII characters can break parsing.
@@ -28,7 +31,7 @@ $repo = Split-Path $root -Parent
 $sln = Join-Path $repo 'CywApi.slnx'
 $bin = Join-Path $root "bin\$Configuration"
 $dist = Join-Path $root 'dist'
-$stage = Join-Path $dist 'stage'
+$release = Join-Path $dist 'release'
 $zip = Join-Path $dist 'CYW-Plugins.zip'
 
 # --- classification rules (edit here when new projects are added) ---------------
@@ -68,8 +71,8 @@ if (-not (Test-Path $bin)) {
 }
 
 if (Test-Path $dist) { Remove-Item $dist -Recurse -Force }
-$pluginsDir = Join-Path $stage 'plugins\global'
-$depsDir = Join-Path $stage 'dependencies\global'
+$pluginsDir = Join-Path $release 'plugins\global'
+$depsDir = Join-Path $release 'dependencies\global'
 New-Item -ItemType Directory -Force -Path $pluginsDir, $depsDir | Out-Null
 
 $pluginCount = 0
@@ -102,19 +105,20 @@ Extract this zip INTO the LabAPI folder of your SCP:SL dedicated server:
     %APPDATA%\SCP Secret Laboratory\LabAPI\        (Windows)
     ~/.config/SCP Secret Laboratory/LabAPI/        (Linux)
 
-The archive mirrors the LabAPI layout:
+The archive already mirrors the LabAPI layout (single extraction, no nested zip):
 
     plugins/global/        plugin assemblies
     dependencies/global/   shared dependency assemblies (0Harmony, *.Core, ...)
 
 After extraction, restart the server.
 '@
-[IO.File]::WriteAllText((Join-Path $stage 'README-INSTALL.txt'), $installReadme, [Text.UTF8Encoding]::new($false))
+[IO.File]::WriteAllText((Join-Path $release 'README-INSTALL.txt'), $installReadme, [Text.UTF8Encoding]::new($false))
 
-Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -Force
-Remove-Item $stage -Recurse -Force
+Compress-Archive -Path (Join-Path $release '*') -DestinationPath $zip -Force
 
-Write-Host "==> Package ready: $zip" -ForegroundColor Green
+Write-Host "==> Package ready" -ForegroundColor Green
+Write-Host "    release folder: $release"
+Write-Host "    zip:            $zip"
 Write-Host "    plugins: $pluginCount, dependencies: $depCount"
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem

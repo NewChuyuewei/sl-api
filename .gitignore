@@ -23,5 +23,5 @@ opencode.json
 .mcp.json
 example/
 
-# 打包输出
-CYW.Plugins/dist/c
+# packaging output
+CYW.Plugins/dist/

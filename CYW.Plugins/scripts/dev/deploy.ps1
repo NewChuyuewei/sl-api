@@ -1,5 +1,5 @@
 # CYW's Plugins - deploy to the LOCAL LabAPI folder (dev loop).
-# Mirrors the release flow: package once (one zip), extract once.
+# Mirrors the release flow: package once (one release folder), copy once.
 # Requirements: CYWS-BLD-003.
 #
 # Usage:
@@ -16,7 +16,7 @@ $ErrorActionPreference = 'Stop'
 
 $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent   # CYW.Plugins
 $packaging = Join-Path $root 'packaging.ps1'
-$zip = Join-Path $root 'dist\CYW-Plugins.zip'
+$release = Join-Path $root 'dist\release'
 $lab = Join-Path $env:APPDATA 'SCP Secret Laboratory\LabAPI'
 
 if ($SkipBuild) {
@@ -25,10 +25,10 @@ if ($SkipBuild) {
     & $packaging
 }
 
-if (-not (Test-Path $zip)) { throw "Package not found: $zip" }
+if (-not (Test-Path $release)) { throw "Release folder not found: $release" }
 
 New-Item -ItemType Directory -Force -Path $lab | Out-Null
-Expand-Archive -Path $zip -DestinationPath $lab -Force
+Copy-Item (Join-Path $release '*') $lab -Recurse -Force
 
 Write-Output "Deployed to: $lab"
 Get-ChildItem (Join-Path $lab 'plugins\global'), (Join-Path $lab 'dependencies\global') -File |

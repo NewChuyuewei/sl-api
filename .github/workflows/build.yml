@@ -67,9 +67,12 @@ jobs:
         run: |
           & "CYW.Plugins/packaging.ps1" -SkipBuild
 
-      - name: Upload package
+      # Upload the RELEASE FOLDER (not the pre-made zip) so the downloaded artifact
+      # is a single zip whose root is plugins/ + dependencies/ + README-INSTALL.txt:
+      # extract once, no nested zip.
+      - name: Upload package (folder -> single-zip artifact)
         uses: actions/upload-artifact@v7
         with:
           name: cyw-plugins
-          path: CYW.Plugins/dist/CYW-Plugins.zip
+          path: CYW.Plugins/dist/release
           if-no-files-found: error
