@@ -2,7 +2,7 @@
 
 > 配套计划：`tasks/plan.md`
 > 图例：P0/P1/P2/P3 = 优先级；S/M/L = 规模（1-2 / 3-5 / 5+ 文件）
-> Phase 0–2 已细化；Phase 3+ 滚动细化（见计划 §5.3）
+> Phase 0–2 已细化；Phase 3+ 滚动细化（见计划 §5.3）｜ **v1.1 增补 Phase 7–9**（EXILED 对标子系统 / 自研增强工具 / 退役验收）
 
 ---
 
@@ -216,6 +216,28 @@
 - [ ] 6.4 发布清单核对（技能 scpsl-migration-release 的 release-checklist）
 - [ ] 6.5 v0.1 公开发布
 
+### Phase 7：EXILED 对标子系统（v1.1 新增，P1/P2，见计划 §1.5）
+- [ ] 7a 权限：节点/组/继承（配置驱动）→ LabAPI 权限集成 → 命令框架对接（`CYW.Permissions`）
+- [ ] 7b 名牌/头衔展示（`CYW.NameTag`，对标 CreditTags）
+- [ ] 7c 加载器生态协议：互操作 API 程序集拆分评审（promotion rule）→ 第三方依赖解析（`CYW.Loader`）
+- [ ] 7d 安装/升级工具（`CYW.Installer`）
+- [ ] CP7：M7 四项（Permissions/NameTag/Loader/Installer）交付并实机验证 → §1.5 矩阵必须项自此齐备
+
+### Phase 8：自研增强工具（v1.1 新增，P2/P3，按需取舍）
+- [ ] 8.1 Profiler（性能剖析：模块/补丁/事件订阅者耗时）
+- [ ] 8.2 Scheduler（调度器：任务队列 / tick 分片）
+- [ ] 8.3 NetOptimizer（网络优化）
+- [ ] 8.4 其余按需取舍：MemoryManager / EntityManager / Printer / LoadController（评审决定去留）
+- [ ] CP8：按需交付清单确定，交付项实机验证
+
+### Phase 9：EXILED 退役验收（v1.1 新增，P0，发布 v1.0）
+- [ ] 9.1 §1.5 退役验收清单逐项签收（每项链接 VR 证据）
+- [ ] 9.2 自有 Mod 套件在纯 LabAPI 服务器完成 ≥1 场完整对局（无 EXILED）
+- [ ] 9.3 配置/权限迁移对照表（EXILED 设置 → CYW 设置）
+- [ ] 9.4 性能基线对比（装载 EXILED 前后：TPS / 内存不劣化 >5%）
+- [ ] 9.5 v1.0 发布（替代 EXILED 里程碑）
+- [ ] CP9：退役清单全过 → v1.0
+
 ---
 
 ## 备注
@@ -257,3 +279,11 @@
   - `deploy.ps1` 重写为"打包 + 解压"单一真相源（修复 F-009 参数绑定 bug）。
   - CI 改为：全量构建（警告即错误）→ 26 单测 → `packaging.ps1` → 单包 artifact `cyw-plugins`。
   - 本地全链路验证 ✅：构建 0/0、26/26、zip 内容正确（plugins:1 / deps:2）、解压落位正确。
+- **2026-11-08（单层 artifact 修复，F-010）**
+  - 用户报告：打包 zip 套娃（需解压两次）→ 根因：CI 上传预打包 zip，artifact 服务再包一层。
+  - 修复：CI 改上传 `dist/release` 目录（下载即单层 zip）；`packaging.ps1` 双形态输出（`dist/release/` 真相源 + `dist/CYW-Plugins.zip` 分发副本）；`deploy.ps1` 改为目录复制（免解压往返）。
+  - 本地复验：打包内容正确、目录落位正确；提交 `daf5d04` 并推送；F-010 登记（VR-006 表 + VR-010 补充记录）。
+- **2026-11-08（计划 v1.1：轻量级综合 API / 替代 EXILED）**
+  - `plan.md` v1.1：新增 §1.5（替代语义 + 轻量级量化约束表 + 程序集拆分 promotion rule + EXILED→CYW 能力矩阵 + 退役验收清单）；里程碑增补 **M7–M9**；§5.2/§5.3/§6/§8 同步增补；非目标明确"EXILED 二进制兼容不做，功能级替代是目标"。
+  - 本文件：增补 Phase 7（EXILED 对标子系统）/ Phase 8（自研增强工具）/ Phase 9（退役验收）。
+  - `PLUGINS.md`：状态列改阶段标注（M1–M9）。

@@ -1,6 +1,6 @@
 # 实施计划：CYW's API — SCP:SL 插件框架
 
-> **状态**：已评审并确认（2026-11-07）
+> **状态**：已评审并确认（2026-11-07）｜ **v1.1 修订（2026-11-08）**：定位升级为「轻量级综合 API——对标并**替代 EXILED**」（新增 §1.5；里程碑增补 M7–M9；§5.2/§5.3/§6/§8 同步增补）
 > **任务清单**：`tasks/todo.md`（Phase 0–2 已细化；Phase 3+ 为滚动细化）
 > **制定方法**：context7 MCP（LabAPI 官方文档）+ SCP:SL 技能套件（scpsl-plugin-dev / scpsl-labapi / scpsl-migration-release / planning-and-task-breakdown）+ 对 `example/LabExtended-master` 的只读全量盘点（探索代理）+ GitHub 公开信息核查
 
@@ -12,6 +12,8 @@
 开发自有 SCP:SL 插件框架 **CYW's API**——一个基于 **LabAPI 1.1.7** 的库插件（`0CywApi.dll`，最先加载）。
 
 **定位（2026-11-07 确认）**：CYW's API 是**自有 Mod 与后续服务端修改的底层框架**，角色对标 LabAPI / EXILED 所处的"开发者体验层"——为构建其上的插件提供高质量扩展能力（玩家包装、事件系统、命令框架、自定义物品/角色/效果/能力、提示叠层、Settings API、Remote Admin API 等），并作为后续深度服务端修改的底座。API 面向"框架使用者"设计，开发体验与稳定性优先。
+
+**替代 EXILED（2026-11-08 新增目标）**：CYW's API 的完备形态（1.0）要达到"**可以用它替换 EXILED**"的程度——自有 Mod 套件（`CYW.*` 插件集）在**纯 LabAPI 服务器**上即可完整运行，不再需要安装 EXILED。原则是**轻量级综合 API**：功能面覆盖实际使用的 EXILED 能力（旗舰为 CustomItems / CustomRoles / Permissions / Events / 命令），但用更少的程序集、更小的依赖面、可枚举的补丁面实现。详见 §1.5。
 
 ### 融合方式：参考重写（已确认）
 以 `example/LabExtended-master`（v1.4.0.2，**517 个 .cs 文件 / 58,726 行**）及其公开 Wiki 作为**功能规格与行为参考**，从零实现 CYW's API：
@@ -28,9 +30,57 @@
 
 ### 非目标（本期不做）
 - 替代 LabAPI（服务器内置、不可移除；CYW's API 构建在其之上——EXILED 9.x 自身同样引用 LabAPI 内核）
-- EXILED 兼容 / 双框架适配
+- **EXILED 二进制兼容**（跑他人的 EXILED 插件）与双框架适配——**功能级替代是目标**（见 §1.5），接口级兼容不是
 - LabExtended 二进制兼容（第三方 LabExtended 插件无需能运行在我们框架上）
 - 100% 功能等价（按优先级裁剪，如语音/音频可延后或砍掉）
+
+---
+
+## 1.5 EXILED 替代策略与能力矩阵（v1.1 新增）
+
+### 替代语义
+- **目标**：自有 Mod 套件（`CYW.*` 插件集）＋ CYW's API 在**纯 LabAPI 服务器**上完整运行——卸载 EXILED 后服务器功能不受影响（对照下方矩阵逐项签收）。
+- **非目标**：直接运行他人的 EXILED 插件（二进制兼容，不做）；照搬 EXILED 的 API 形状（自由设计，见 D2 参考重写纪律）。
+
+### 「轻量级」量化约束（v1.0 目标）
+
+| 维度 | 约束 | 现状（2026-11-08） |
+|---|---|---|
+| 运行时程序集 | ≤ **4** 个（EXILED 全套 ≈10+） | **2 个**（`0CywApi` + `CywApi.Core`） |
+| 外部依赖 | `0Harmony` 必需；其余第三方按需且默认不部署 | `0Harmony` 1 个 |
+| 补丁面 | 全部可枚举（`[CywPatch]` 注册表）+ 可按配置禁用；禁止隐式补丁 | ✅ 已具备（`CywPatcher`） |
+| 部署面 | 一个 zip、一次解压、重启即用 | ✅ 单层 release 包 |
+| 加载开销 | 启用耗时 < 1s（服务器日志时间戳为准）；无后台线程 | 实测 ≈0.9s（VR-003 时间窗） |
+
+### 程序集拆分规则（Promotion Rule，轻量级优先）
+`CYW.*` 目录 = **代码组织单元**；程序集（DLL）= **发布单元**。仅当以下之一成立才从 `0CywApi` 拆出独立程序集：
+1. **互操作 API 需独立版本化**（第三方插件编译依赖——主要是 `CYW.Loader` 生态协议）；
+2. 单程序集文件数 > 150 或编译明显劣化；
+3. 子系统为**可选重量级**（缺失不影响核心——如未来语音）。
+否则保持合并。
+
+### 能力矩阵（EXILED → CYW 对标）
+
+| EXILED 组件 | 能力 | CYW 对标 | 阶段 | 状态 |
+|---|---|---|---|---|
+| Exiled.API | 插件基类/配置/日志/工具 | `0CywApi`（`CywPlugin`/`CywConfig`/`CywLog`） | M1 | ✅ 已具备 |
+| Exiled.Events | 事件体系（桥接 + 自定义） | `CywEvents.*` + 事件桥 | M2 | 🚧 Phase 2 |
+| （内建于 EXILED） | 属性化命令框架 | 命令框架（Phase 3） | M3 | 🚧 Phase 3 |
+| Exiled.CustomItems | 自定义物品/枪械/投掷物 | M4a 内容（`CYW.CustomItems`） | M4a | 🚧 Phase 4a |
+| Exiled.CustomRoles | 自定义角色/队伍/分波 | M4b 内容（`CYW.CustomRoles`） | M4b | 🚧 Phase 4b |
+| Exiled.Permissions | 权限节点/组/继承/配置驱动 | `CYW.Permissions` | **M7a** | 🚧 |
+| Exiled.CreditTags | 名牌/头衔 | `CYW.NameTag` | **M7b** | 🚧 |
+| Exiled.Loader | 加载器与生态协议（第三方依赖） | `CYW.Loader`（互操作 API 程序集） | **M7c** | 🚧 |
+| Exiled.Installer | 安装器工具 | `CYW.Installer` | **M7d** | 🚧 |
+| （无对标，自研） | Profiler / Scheduler / NetOptimizer / MemoryManager / EntityManager / Printer / LoadController | 各自目录（按需取舍） | M8 | 🚧 |
+
+### EXILED 退役验收清单（Replacement Definition of Done）
+
+- [ ] 矩阵"必须项"（API / Events / 命令 / CustomItems / CustomRoles / Permissions / NameTag）全部通过实机演示（VR 记录归档）
+- [ ] 自有 Mod 套件在纯 LabAPI 服务器完成 ≥1 场完整对局，无 CYW's API 引发的错误
+- [ ] 卸载 EXILED 后服务器：启动 / 回合 / 重载 / 禁用循环全部干净
+- [ ] 配置/权限迁移对照表（EXILED 设置项 → CYW 设置项）齐备
+- [ ] 性能基线：与装 EXILED 时对比（TPS / 内存）不劣化 > 5%
 
 ---
 
@@ -82,6 +132,9 @@ M3 命令框架 ────▶ CP3: RA 与客户端控制台命令可用（含�
 M4 自定义内容 ──▶ CP4a 物品/枪械/投掷物；CP4b 角色/队伍/分波；CP4c 效果/能力/弹药
 M5 呈现与交互 ──▶ CP5a Hints 叠层；CP5b Settings；CP5c RA API；CP5d Toys/地图；CP5e 语音(可选)
 M6 打磨与发布 ──▶ CP6: 发布清单全过 + 干净服务器验收 + v0.1 公开
+M7 EXILED 对标完备 ─▶ CP7: Permissions / NameTag / Loader 生态协议 / Installer（§1.5 矩阵）可用
+M8 自研增强工具轨 ──▶ CP8: Profiler / Scheduler / NetOptimizer 等按需交付
+M9 EXILED 退役验收 ─▶ CP9: §1.5 退役清单逐项签收 → v1.0
 ```
 
 每个检查点都包含固定的**服务器冒烟循环**：`启动 → 插件加载 → 完整回合 → 重载/重启 → 禁用 → 无错误日志`。
@@ -120,6 +173,11 @@ M6 打磨与发布 ──▶ CP6: 发布清单全过 + 干净服务器验收 + v
 | 语音/音频 | ≈1.1k 行 + Voice 补丁 | P3 | M5e | 后台线程 Opus；可整体裁剪（README 提及的 NVorbis 实际零引用） |
 | 修复杂项（Fixes/节假日/SCP079奖励等） | Patches 内 ≈15 文件 | P3 | M6 | 按需搬运移植（如客户端自定义命令修复很实用，可提前） |
 | 工具层（Extensions/Utilities/Pooling） | 19+42+8 文件 ≈11k 行 | 伴随 | 各阶段 | 随需实现，不单独成阶段 |
+| EXILED 对标：Permissions | Exiled.Permissions 对标 | P1 | M7a | 节点/组/继承 + 配置驱动 + 命令集成（§1.5） |
+| EXILED 对标：NameTag | Exiled.CreditTags 对标 | P2 | M7b | 名牌/头衔展示 |
+| EXILED 对标：Loader 生态协议 | Exiled.Loader 对标 | P1 | M7c | 版本化互操作 API + 依赖解析；触发 promotion rule 评审 |
+| EXILED 对标：Installer | Exiled.Installer 对标 | P2 | M7d | 安装/升级工具 |
+| 自研增强工具 | — | P3 | M8 | Profiler/Scheduler/NetOptimizer/MemoryManager/EntityManager/Printer/LoadController（按需） |
 
 ### 5.3 Phase 3+ 滚动细化（到达该阶段时再拆成 T 级任务）
 
@@ -127,6 +185,9 @@ M6 打磨与发布 ──▶ CP6: 发布清单全过 + 干净服务器验收 + v
 - **Phase 4 自定义内容**：4a 物品基类+跟踪器 → 枪械/投掷物 → 4b 角色+队伍 → 分波选择 → 4c 效果/能力/弹药 → 4d 游戏模式
 - **Phase 5 呈现与交互**：5a Hints（控制器/元素/补丁）→ 5b Settings → 5c RA API → 5d Toys/Prefabs/地图包装 → 5e 语音（可选，默认最后）
 - **Phase 6 打磨发布**：修复类补丁按需 → 文档（README/API XML/教程）→ 示例插件 → CI 完善 → 发布清单 → v0.1
+- **Phase 7 EXILED 对标子系统**：7a Permissions（节点/组/继承 → 命令集成）→ 7b NameTag → 7c Loader 生态协议（互操作 API 拆分评审 + 依赖解析）→ 7d Installer
+- **Phase 8 自研增强工具**（按需）：Profiler → Scheduler → NetOptimizer → MemoryManager / EntityManager / Printer / LoadController
+- **Phase 9 EXILED 退役验收**：§1.5 矩阵签收 → 退役清单 → 迁移对照表 → 性能基线 → v1.0
 
 ---
 
@@ -142,6 +203,8 @@ M6 打磨与发布 ──▶ CP6: 发布清单全过 + 干净服务器验收 + v
 | 早期加载深度不足（参考实现在构造函数期修复 LabAPI 自身行为的场景） | 中 | v0.1 先用标准早加载路径；预留"加载前补丁"增强项（日志钩子级）到 Phase 6 按需 |
 | 与 LabExtended 混淆/权利争议 | 低 | 独立实现声明 + 致谢；不复制文本/不搬运其构建产物 |
 | Z: 盘空间不足 | 低 | 服务端与 steamcmd 一律安装到 D:/E:；仓库本身很小 |
+| EXILED 替代目标扩大范围（范围膨胀） | 中 | §1.5「轻量级」量化约束表防膨胀；M7 各子系统"够用即停"；promotion rule 控制程序集数量 |
+| 与 EXILED 行为差异导致迁移摩擦 | 中 | 退役清单包含配置/权限迁移对照表；关键行为在需求文档登记基线（requirements.md） |
 
 ---
 
@@ -164,6 +227,8 @@ M6 打磨与发布 ──▶ CP6: 发布清单全过 + 干净服务器验收 + v
 | 参考入口文件（速查） | `LabExtended/Core/ApiLoader.cs`、`Core/ApiPatcher.cs`、`API/ExPlayer.cs`、`Events/InternalEvents.cs`、`Commands/CommandManager.cs`、`.github/workflows/dotnet.yml` |
 | LabExtended 公开 Wiki（规格参考） | https://github.com/marchellcx/LabExtended/wiki（Home / API 两页） |
 | LabAPI 官方 Wiki（权威文档） | https://github.com/northwood-studios/LabAPI/wiki |
+| EXILED 官方仓库（对标/结构参考） | https://github.com/ExMod-Team/EXILED（`EXILED/` 产品目录、`Directory.Build.props`/`EXILED.props`、`build.ps1`/`packaging.ps1` 模式已采纳） |
+| EXILED 技能参考 | `.opencode/skills/scpsl-exiled/references/`（api-map / events-catalogue / config-and-translations） |
 | 技能参考文件 | `.opencode/skills/scpsl-labapi/references/`（api-map / events-catalogue / wrappers-and-features）、`scpsl-plugin-dev/references/`（version-pins / decision-matrix） |
 | 生命周期与质量框架（DO-178C 对标） | `docs/lifecycle/`（需求/验证记录/CM/QA/工具置信度）、`CONSTRAINTS.md`（可机械检查护栏）、`AGENTS.md`（协作须知） |
 | 服务端实际安装路径（2026-11-08） | `E:\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server`（`SL_REFERENCES` 指向其 `SCPSL_Data\Managed`）；LabAPI 部署目录 `%APPDATA%\SCP Secret Laboratory\LabAPI\{plugins,dependencies,configs}` |
