@@ -31,7 +31,7 @@
 
 1. **一个工程一个目录**：`CYW.X/` 内含其 `.csproj`（或 `src/` 子结构）；加入根 `CywApi.slnx` 后参与全量构建。
 2. **程序集拆分规则（Promotion Rule）**：目录 = 代码组织单元，DLL = 发布单元；仅当「需独立版本化的互操作 API / 单程序集 >150 文件 / 可选重量级」之一成立才从 `0CywApi` 拆出独立程序集（轻量级约束：运行时程序集 ≤4，见 `tasks/plan.md` §1.5）。
-3. **共享构建属性**：全部由 [`Directory.Build.props`](Directory.Build.props) 提供（net48 / x64 / Release 警告即错误 / **统一输出到 `bin/<Configuration>/`**）。
+3. **共享构建属性**：全部由 [`Directory.Build.props`](Directory.Build.props) 提供（net48 / x64 / **C# 14** / Release 警告即错误 / **统一输出到 `bin/<Configuration>/`**；.NET 10 SDK 由根级 `global.json` 钉住）。
 4. **打包分类**：`packaging.ps1` 头部规则决定 DLL 去 `plugins/global` 还是 `dependencies/global`
    （`*.Core / *.Shared / *.Library / 0Harmony` → dependencies；其余 → plugins）。新增依赖 DLL 时更新规则表。
 5. **需求追溯**：新行为先登记 `docs/lifecycle/requirements.md`（见根 `AGENTS.md`）。

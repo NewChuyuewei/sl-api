@@ -60,7 +60,7 @@
   - 紧急修复 → 可先实现，但**同一提交**必须回填需求与证据；
   - 破坏基线的行为变更 → 旧证据标记失效，重新收集。
 - **可复现构建**：
-  - .NET SDK 主版本固定（当前 10.x）；NuGet 依赖全部**显式钉死版本**（无浮动范围）；`packages.lock.json` 策略：单人阶段使用钉死版本 + 提交 `obj/project.assets.json` 不入库（评估中→列入遗留项）；
+  - 工具链显式钉住：**.NET 10 SDK**（根级 `global.json`，10.0 特性带）+ **C# 14**（`LangVersion=14.0`，见 `Directory.Build.props`）；NuGet 依赖全部**显式钉死版本**（无浮动范围）；`packages.lock.json` 策略：单人阶段使用钉死版本 + 提交 `obj/project.assets.json` 不入库（评估中→列入遗留项）；
   - 目标环境（游戏版本/LabAPI 版本）记录于每次验证记录；
   - 环境变量 `SL_REFERENCES` 与部署布局见 `docs/dev/test-server.md`。
 

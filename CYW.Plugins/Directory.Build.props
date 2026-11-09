@@ -8,6 +8,9 @@
   Key points:
   - All projects target net48 / x64 and share ONE output folder (bin/<Configuration>),
     so packaging.ps1 can collect every plugin assembly from a single directory.
+  - Toolchain is explicit: .NET 10 SDK (pinned by the repo-root global.json) with
+    C# 14 (LangVersion pinned below); the target framework stays net48 for the
+    SCP:SL Mono runtime.
   - Release is strict: warnings are errors and XML documentation is generated.
   - Single project output: AppendTargetFrameworkToOutputPath=false removes the
     "net48" subfolder; the test project overrides OutputPath to stay out of the
@@ -17,7 +20,7 @@
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>14.0</LangVersion>
     <PlatformTarget>x64</PlatformTarget>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

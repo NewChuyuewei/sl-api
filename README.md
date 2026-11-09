@@ -54,7 +54,7 @@ powershell -File "CYW.Plugins/scripts/dev/deploy.ps1"
 
 ## 环境要求
 
-- .NET SDK 8+（建议 10）
+- .NET SDK **10**（C# 14；由根级 `global.json` 钉住 10.0 特性带）
 - SCP:SL 专用服务器文件（提供 `SCPSL_Data\Managed` 构建引用）
 - 环境变量 `SL_REFERENCES` 指向 `SCPSL_Data\Managed`
 
