@@ -19,7 +19,6 @@ desktop.ini
 opencode.json
 
 # 工作区工具（不属于产品，不进入公开仓库）
-.opencode/
 .mcp.json
 example/
 

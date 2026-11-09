@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- __PLUGIN_NAME__ — EXILED 9.15.3 plugin. Targets net48 (game/framework). -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>Library</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>__PLUGIN_NAME__</AssemblyName>
+    <RootNamespace>__PLUGIN_NAME__</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>__AUTHOR__</Authors>
+    <!-- Folder containing the EXILED 9.15.3 assemblies and the server's
+         SCPSL_Data/Managed assemblies (Assembly-CSharp-Publicized.dll etc.).
+         Override: dotnet build -p:EXILED_REFERENCES="C:\path\to\references" -->
+    <EXILED_REFERENCES Condition="'$(EXILED_REFERENCES)' == ''">$(MSBuildThisFileDirectory)references</EXILED_REFERENCES>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- EXILED 9.15.x. NOTE: NuGet lagged the GitHub release at pin time
+         (NuGet 9.15.2 vs GitHub v9.15.3). Check NuGet before using this
+         PackageReference; if 9.15.3 is not published yet, delete it and use
+         the release-DLL references in the next ItemGroup instead. -->
+    <PackageReference Include="ExMod.Exiled" Version="9.15.2" />
+    <PackageReference Include="Lib.Harmony" Version="2.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Game/framework assemblies: reference-only, never copy to output or ship.
+         When referencing EXILED release DLLs instead of the NuGet package, add
+         Exiled.API.dll / Exiled.Events.dll (and feature assemblies you use)
+         from $(EXILED_REFERENCES) here in the same Private=false style. -->
+    <Reference Include="Assembly-CSharp" HintPath="$(EXILED_REFERENCES)\Assembly-CSharp-Publicized.dll" Private="false" />
+    <Reference Include="Assembly-CSharp-firstpass" HintPath="$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll" Private="false" />
+    <Reference Include="CommandSystem.Core" HintPath="$(EXILED_REFERENCES)\CommandSystem.Core.dll" Private="false" />
+    <Reference Include="LabApi" HintPath="$(EXILED_REFERENCES)\LabApi.dll" Private="false" />
+    <Reference Include="Mirror" HintPath="$(EXILED_REFERENCES)\Mirror.dll" Private="false" />
+    <Reference Include="NorthwoodLib" HintPath="$(EXILED_REFERENCES)\NorthwoodLib.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(EXILED_REFERENCES)\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="UnityEngine.PhysicsModule" HintPath="$(EXILED_REFERENCES)\UnityEngine.PhysicsModule.dll" Private="false" />
+  </ItemGroup>
+
+</Project>

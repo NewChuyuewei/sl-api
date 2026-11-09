@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- __PLUGIN_NAME__ — LabAPI 1.1.7 plugin. Targets net48 (game/framework). -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>Library</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>__PLUGIN_NAME__</AssemblyName>
+    <RootNamespace>__PLUGIN_NAME__</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>__AUTHOR__</Authors>
+    <!-- Folder containing the SCP:SL dedicated server's SCPSL_Data/Managed assemblies.
+         Override on the command line: dotnet build -p:SL_REFERENCES="C:\path\to\Managed" -->
+    <SL_REFERENCES Condition="'$(SL_REFERENCES)' == ''">$(MSBuildThisFileDirectory)references</SL_REFERENCES>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- LabAPI 1.1.7 (official). Alternatively remove this and reference the server's
+         bundled LabAPI.dll — never mix versions. -->
+    <PackageReference Include="Northwood.LabAPI" Version="1.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Game/framework assemblies: reference-only, never copy to output or ship. -->
+    <Reference Include="Assembly-CSharp" HintPath="$(SL_REFERENCES)\Assembly-CSharp.dll" Private="false" />
+    <Reference Include="Assembly-CSharp-firstpass" HintPath="$(SL_REFERENCES)\Assembly-CSharp-firstpass.dll" Private="false" />
+    <Reference Include="CommandSystem.Core" HintPath="$(SL_REFERENCES)\CommandSystem.Core.dll" Private="false" />
+    <Reference Include="Mirror" HintPath="$(SL_REFERENCES)\Mirror.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(SL_REFERENCES)\UnityEngine.CoreModule.dll" Private="false" />
+  </ItemGroup>
+
+</Project>

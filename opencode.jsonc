@@ -1,0 +1,13 @@
+{
+  // SCP:SL plugin development team for OpenCode v2.
+  // Agents live in .opencode/agents/, skills in .opencode/skills/ (synced from ./skills).
+  // No model is pinned anywhere: every agent inherits the session model.
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "scpsl-commander",
+  "permissions": [
+    // Project-wide safety rails. Agent-specific rules in .opencode/agents/*.md refine these.
+    { "action": "shell", "resource": "git push *", "effect": "ask" },
+    { "action": "shell", "resource": "rm -rf *", "effect": "ask" },
+    { "action": "edit", "resource": "**/.env*", "effect": "ask" }
+  ]
+}
