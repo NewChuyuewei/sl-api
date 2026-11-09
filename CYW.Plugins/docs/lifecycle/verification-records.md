@@ -98,7 +98,7 @@
 | F-007 | Nit（流程） | 变异抽查恢复环节：增量构建因旧时间戳跳过重编译，复测跑在变异产物上（假红） | 🔧 流程加固：恢复后强制重建/touch；规则已写入 CONSTRAINTS.md 关键规则提醒 |
 | F-008 | **Critical（构建阻断）** | 目录名含撇号（`CYW's.Plugins`）劈断 MSBuild item-transform（`@(DocFileItem->'$(OutDir)...')` 的单引号被展开路径中的撇号截断）→ `MSB3021` 构建失败 | ✅ 已修复：全仓库目录去撇号（`CYW.Plugins` / `CYW.NameTag`），品牌名仅保留在显示元数据；规则写入 CONSTRAINTS.md |
 | F-009 | Required（脚本） | `deploy.ps1` 以数组 splat 传参，`-SkipBuild` 被位置绑定为 `Configuration` 值 → 打包失败 | ✅ 已修复：改为条件直接调用；执行演示复测（打包+解压落位）通过 |
-| F-010 | Required（分发） | CI artifact 双层 zip：上传预打包 `CYW-Plugins.zip` 被 artifact 服务再包一层 → 用户下载后需解压两次（用户报告发现） | ✅ 已修复：CI 改上传 `dist/release` 目录（下载即单层 zip）；`packaging.ps1` 双形态输出；`deploy.ps1` 目录复制；本地复验通过（提交 `daf5d04`） |
+| F-010 | Required（分发） | CI artifact 双层 zip：上传预打包 `CYW-Plugins.zip` 被 artifact 服务再包一层 → 用户下载后需解压两次（用户报告发现） | ✅ **已闭环**：CI 改上传 `dist/release` 目录；`packaging.ps1` 双形态输出；`deploy.ps1` 目录复制（提交 `daf5d04`）。**远端复核（2026-11-09）：run #5 artifact 下载解包 = 单层（根即 plugins/dependencies/README）** |
 
 - **审查者**：AI 优化轮（作者与审查者同源，独立性受限已声明；人工评审为最终把关）
 - **结论**：4 项 Required 修复 + 1 项 Nit 采纳；修复均处于本优化轮内完成并回归（见 VR-007/VR-008/VR-009）。
@@ -155,4 +155,4 @@
   - `pwsh packaging.ps1 -SkipBuild` → `dist/release/`（`README-INSTALL.txt` + `plugins/global/0CywApi.dll` + `dependencies/global/{CywApi.Core.dll, 0Harmony.dll}`）+ `dist/CYW-Plugins.zip`（同内容分发副本）
   - `deploy.ps1 -SkipBuild` → 目录复制落位 `LabAPI\{plugins\global, dependencies\global}` ✓（免解压往返）
   - CI：`upload-artifact` 改上传 `CYW.Plugins/dist/release` → 下载的 artifact 即单层（根为 `plugins/ + dependencies/`）
-  - 修复提交 `daf5d04`；远端运行复核后关闭该发现
+  - 修复提交 `daf5d04`；**远端复核（2026-11-09）**：run #5（`daf5d04`）/ run #6（`719a174`）全绿；下载 run #5 artifact 解包 → 根即 `plugins/` + `dependencies/` + `README-INSTALL.txt`（**单层确认**）——该发现闭环

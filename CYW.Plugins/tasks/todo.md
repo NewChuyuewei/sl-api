@@ -283,7 +283,12 @@
   - 用户报告：打包 zip 套娃（需解压两次）→ 根因：CI 上传预打包 zip，artifact 服务再包一层。
   - 修复：CI 改上传 `dist/release` 目录（下载即单层 zip）；`packaging.ps1` 双形态输出（`dist/release/` 真相源 + `dist/CYW-Plugins.zip` 分发副本）；`deploy.ps1` 改为目录复制（免解压往返）。
   - 本地复验：打包内容正确、目录落位正确；提交 `daf5d04` 并推送；F-010 登记（VR-006 表 + VR-010 补充记录）。
+  - 远端复核（2026-11-09）：runs #5（`daf5d04`）/#6（`719a174`）全绿；下载 run #5 artifact 解包验证单层（根 = `plugins/`+`dependencies/`+README）→ **F-010 闭环**。
 - **2026-11-08（计划 v1.1：轻量级综合 API / 替代 EXILED）**
   - `plan.md` v1.1：新增 §1.5（替代语义 + 轻量级量化约束表 + 程序集拆分 promotion rule + EXILED→CYW 能力矩阵 + 退役验收清单）；里程碑增补 **M7–M9**；§5.2/§5.3/§6/§8 同步增补；非目标明确"EXILED 二进制兼容不做，功能级替代是目标"。
   - 本文件：增补 Phase 7（EXILED 对标子系统）/ Phase 8（自研增强工具）/ Phase 9（退役验收）。
   - `PLUGINS.md`：状态列改阶段标注（M1–M9）。
+- **2026-11-09（AGENTS.md 融合 + 工具链明确）**
+  - `AGENTS.md`：并入 SCP:SL Skills & SubAgents 使用规范（A 项目规则 / B 技能套件与代理团队：B1 目标与版本、B2 团队表、B3 不可协商项、B4 工作方式）。
+  - 工具链显式钉住：**C# 14**（`LangVersion=14.0`）+ **.NET 10 SDK**（根级 `global.json`，10.0 特性带）；目标框架保持 `net48`。
+  - `.opencode/`（17 技能 + 11 代理）与 `opencode.jsonc` 解除忽略、随仓库发布（发布前安全扫描通过）。
