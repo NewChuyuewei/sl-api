@@ -1,6 +1,6 @@
 # 需求规格（Requirements Specification）
 
-> 文档编号：**CYWS-REQ-001** ｜ 版本：v1.0（2026-11-08） ｜ 基准：见 `docs/lifecycle/README.md` §配置管理
+> 文档编号：**CYWS-REQ-001** ｜ 版本：v1.1（2026-11-14，质量加固战役登记：LOG-005、PAT-007~009、MOD-005、BLD-005~006、CMP-003 变更） ｜ 基准：见 `docs/lifecycle/README.md` §配置管理
 > 方法：DO-178C 等比缩放（适用性声明见 `docs/lifecycle/README.md`）。
 > 验证方法图例：**T** = 离服单元测试 ｜ **D** = 实机演示（目标环境验证） ｜ **R** = 审查 ｜ **A** = 分析
 > 验证证据编号（VR-xxx）对应 `docs/lifecycle/verification-records.md`。
@@ -41,6 +41,8 @@
 | CYWS-LOG-003 | 可选的来源程序集名前缀（排除框架自身程序集） | `CYW.API/src/CywApi/CywLog.cs` | R | VR-006 | ✅ |
 | CYWS-LOG-004 | 颜色解析器对 null/空输入返回原值（不抛出） | `AnsiColorParser`（参数宣告为可空） | T | VR-002（26 用例，含 3 项空值用例） | ✅ |
 
+| CYWS-LOG-005 | 输出净化（choke-point）：`CywLog.Format` 在颜色处理前将原始控制字符（C0/C1；换行 `\n` 除外）替换为可见表示，使不可信字符串无法注入终端控制序列或伪造日志行；另提供 `EscapeData(string)` 将一切控制字符（含 `\n`/`\r`）转为可见表示，供数据字段使用 | `CywLog.cs` + Core `ControlCharFilter`（新增）+ 单测 | T/D | 待收集（VR-011+） | 🔧 |
+
 ### 2.3 补丁系统（PAT）
 
 | ID | 低层需求 | 实现 | 验证方法 | 验证证据 | 状态 |
@@ -52,6 +54,10 @@
 | CYWS-PAT-005 | 应用/失败/跳过计数在每次应用与汇总时报告 | `CywPatcher` | D | VR-003/VR-005 | ✅ |
 | CYWS-PAT-006 | 同一程序集重复应用为幂等操作（不产生重复补丁），并记录跳过 | `CywPatcher.Apply`（已应用集合守卫） | R | VR-006（F-003 修复）+ VR-009 回归 | ✅ |
 
+| CYWS-PAT-007 | 补丁器状态一致性：程序集仅在类型发现成功后标记为已应用；发现/处理失败时回滚标记（保持可重试）；计数覆盖单次 Apply 调用范围并如实汇总 | `CywPatcher.Apply` | T/R | 待收集（VR-011+） | 🔧 |
+| CYWS-PAT-008 | 部分加载诊断：`ReflectionTypeLoadException` 时将 LoaderExceptions 数量与首条消息记录为 Warn | `CywPatcher.Apply` | T/R | 待收集（VR-011+） | 🔧 |
+| CYWS-PAT-009 | 公共契约与审计：`Apply`/`UnpatchAll`/`HarmonyId` 的契约（共享框架 ID、随框架禁用一并撤销、ID 保留语义）在 XML 文档中明示；`UnpatchAll` 成功路径输出 Info 审计行（尽量含受影响方法数） | `CywPatcher.cs` | R/D | 待收集（VR-011+） | 🔧 |
+
 ### 2.4 模块系统（MOD）
 
 | ID | 低层需求 | 实现 | 验证方法 | 验证证据 | 状态 |
@@ -61,13 +67,15 @@
 | CYWS-MOD-003 | 同类型模块重复注册抛出 `InvalidOperationException` | `CywModuleManager.Register` | R | VR-006 | ✅ |
 | CYWS-MOD-004 | 已开始启用（EnableAll 之后）再注册模块必须抛出异常（防止静默不生效） | `CywModuleManager`（运行态守卫） | R | VR-006（F-004 修复）+ VR-009 回归 | ✅ |
 
+| CYWS-MOD-005 | `DisableAll` 在未启用状态下调用：输出警告并保持注册表不变（不清空、不抛出）；禁用路径绝不抛出 | `CywModuleManager` | R/T | 待收集（VR-011+） | 🔧 |
+
 ### 2.5 兼容性（CMP）
 
 | ID | 低层需求 | 实现 | 验证方法 | 验证证据 | 状态 |
 |---|---|---|---|---|---|
 | CYWS-CMP-001 | 从 `GameCore.Version` 的 Major/Minor/Revision 构造运行版本 | `CYW.API/src/CywApi/Modules/CompatibilityModule.cs` | D | VR-003（读出 14.2.9） | ✅ |
 | CYWS-CMP-002 | 版本低于最小支持版本（14.2.0）时输出醒目警告且不崩溃、不阻断启用 | `VersionRange`（Core）+ `CompatibilityModule` | D/T | VR-005（99.0.0 越界警告）、VR-002（VersionRange 5 用例） | ✅ |
-| CYWS-CMP-003 | BuildInfo 注入为幂等（重复启用不重复追加），且注入行出现在 BuildInfo 输出中 | `CompatibilityModule.InjectBuildInfo` | D | VR-005（`buildinfo:` 输出含 `CYW's API v0.1.0`） | ✅ |
+| CYWS-CMP-003 | BuildInfo 注入为幂等（重复启用不重复追加），且注入行在**最终** `buildinfo` 输出中可见（须在 LabAPI `AddPluginsToBuildInfo` 覆盖之后写入；经 `ServerEvents.PluginsEnabled` 或等价后置时机） | `CompatibilityModule`（后置注入） | D | **原证据失实**：仅启用瞬时可见、被 LabAPI 覆盖（RV2-02 + 安全审计双重确认）→ 待重新演示 | 🔧 |
 
 ### 2.6 构建与生命周期（BLD）
 
@@ -78,6 +86,9 @@
 | CYWS-BLD-003 | 部署脚本将产物放置到 `plugins\global` + `dependencies\global` | `scripts/dev/deploy.ps1` | D | VR-003/VR-004 | ✅ |
 | CYWS-BLD-004 | Core 单元测试可离服运行（`dotnet test`），并产生覆盖率测量 | `tests/CywApi.Tests` + coverlet | T | VR-002/VR-008 | ✅ |
 
+| CYWS-BLD-005 | 语言版本单点钉住：全解决方案 `LangVersion` 由 `Directory.Build.props`（14.0）唯一定义；项目不得覆盖 | `Directory.Build.props` + `*.csproj` | R/T | 待收集（VR-011+） | 🔧 |
+| CYWS-BLD-006 | publicize 面最小化：每个 `Publicize="true"` 引用在 csproj 注明理由；`LabApi` 引用默认不 publicize（确需内部成员时逐项注明） | `CywApi.csproj` | R | 待收集（VR-011+） | 🔧 |
+
 ## 3. 追溯索引
 
 ### 3.1 代码 → 需求（倒查表）
@@ -86,19 +97,21 @@
 |---|---|
 | `CYW.API/src/CywApi/CywPlugin.cs` | HLR-001/002（入口）、MOD-001 |
 | `CYW.API/src/CywApi/CywConfig.cs` | HLR-002、CFG-001~004 |
-| `CYW.API/src/CywApi/CywLog.cs` | HLR-003、LOG-001/003/004 |
+| `CYW.API/src/CywApi/CywLog.cs` | HLR-003、LOG-001/003/004/005 |
 | `CYW.API/src/CywApi/CywVersion.cs` | CMP-002 |
 | `CYW.API/src/CywApi/Patching/CywPatchAttribute.cs` | PAT-001 |
-| `CYW.API/src/CywApi/Patching/CywPatcher.cs` | HLR-004、PAT-001/002/004/005/006 |
+| `CYW.API/src/CywApi/Patching/CywPatcher.cs` | HLR-004、PAT-001/002/004/005/006/007/008/009 |
 | `CYW.API/src/CywApi/Modules/ICywModule.cs` | HLR-005 |
-| `CYW.API/src/CywApi/Modules/CywModuleManager.cs` | HLR-005、MOD-001~004 |
+| `CYW.API/src/CywApi/Modules/CywModuleManager.cs` | HLR-005、MOD-001~005 |
 | `CYW.API/src/CywApi/Modules/CompatibilityModule.cs` | HLR-006、CMP-001~003 |
 | `CYW.API/src/CywApi/Modules/PatchingModule.cs` | HLR-004（接入模块生命周期） |
 | `CYW.API/src/CywApi.Core/Colors/AnsiColorParser.cs` | HLR-003/007、LOG-002/004 |
 | `CYW.API/src/CywApi.Core/Patching/CywPatchFilter.cs` | HLR-007、PAT-003 |
 | `CYW.API/src/CywApi.Core/Compatibility/VersionRange.cs` | HLR-006/007、CMP-002 |
 | `scripts/dev/deploy.ps1` | BLD-003 |
-| `CywApi.slnx` + `*.csproj` | BLD-001/002/004 |
+| `CywApi.slnx` + `*.csproj` | BLD-001/002/004/005/006 |
+
+| `CYW.API/src/CywApi.Core/Logging/ControlCharFilter.cs`（新增） | HLR-007、LOG-005 |
 
 ### 3.2 测试 → 需求
 
@@ -108,6 +121,7 @@
 | `CywPatchFilterTests` | PAT-003 |
 | `VersionRangeTests` | CMP-002 |
 | `CoreSmokeTests` | HLR-007（测试基础设施） |
+| `ControlCharFilterTests`（新增） | LOG-005 |
 
 ## 4. 需求变更流程
 

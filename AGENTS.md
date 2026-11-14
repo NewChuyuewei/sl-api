@@ -1,7 +1,7 @@
 # AGENTS.md（代理与协作者须知）
 
 > 仓库结构对标 EXILED：根级仅为元文件（`.github/`、LICENSE、本文件等），全部产品位于单一目录 `CYW.Plugins/`。
-> 本文件两部分：**A. 项目规则**（CYW's API 本体，所有协作者与代理、所有任务始终有效）｜ **B. 技能套件与代理团队**（SCP:SL Skills & SubAgents——工作区工具，位于 `.opencode/`，不入公开仓库）。
+> 本文件两部分：**A. 项目规则**（CYW's API 本体，所有协作者与代理、所有任务始终有效）｜ **B. 技能套件与代理团队**（SCP:SL Skills & SubAgents，位于 `.opencode/`，随仓库发布）。
 
 ---
 
@@ -20,7 +20,7 @@
 
 ## B. 技能套件与代理团队（SCP:SL Skills & SubAgents）
 
-> 工作区工具位：`.opencode/skills/`（17 个 `scpsl-*` 技能）、`.opencode/agents/`（11 个代理）、根级 `opencode.jsonc`（`default_agent: scpsl-commander`）。`.opencode/` 已被 `.gitignore` 排除（不入公开仓库）；细则见 [`.opencode/README.md`](.opencode/README.md)。
+> 工作区工具位：`.opencode/skills/`（17 个 `scpsl-*` 技能）、`.opencode/agents/`（11 个代理）、根级 `opencode.jsonc`（`default_agent: scpsl-commander`）。`.opencode/` 与 `opencode.jsonc` 已随仓库发布（2026-11-09 起；`.mcp.json`/`example/` 仍排除）；细则见 [`.opencode/README.md`](.opencode/README.md)。
 
 ### B1. 目标与版本（Targets — never guess）
 
