@@ -35,7 +35,7 @@ public sealed class CywPlugin : Plugin<CywConfig>
     public override LoadPriority Priority => LoadPriority.Highest;
 
     /// <inheritdoc/>
-    public override bool IsTransparent => true; // 先按非侵入式声明；替换 Player 等行为落地后再评审（见 plan.md D1）
+    public override bool IsTransparent => true; // 零侵入补丁阶段保持 true；侵入性补丁（M2 D4 玩家替换等）落地前必须复评并预期切换为 false（CYWS-CMP-004 门禁）
 
     /// <inheritdoc/>
     public override void Enable()

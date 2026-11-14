@@ -17,7 +17,7 @@ public static class CywLog
         if (CywPlugin.Instance?.Config?.Debug != true)
             return;
 
-        Logger.Debug(Format(message), true);
+        Logger.Debug(Format(message));
     }
 
     /// <summary>Writes an informational line.</summary>

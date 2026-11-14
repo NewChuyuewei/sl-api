@@ -9,8 +9,8 @@ public static class CywVersion
     /// <summary>Current framework version (single source of truth for the plugin metadata).</summary>
     public static readonly Version Current = new(0, 1, 0);
 
-    /// <summary>Current framework version as a three-part display string.</summary>
-    public const string Display = "0.1.0";
+    /// <summary>Current framework version as a three-part display string, derived from <see cref="Current"/>.</summary>
+    public static readonly string Display = Current.ToString(3);
 
     /// <summary>Minimum supported SCP:SL game version.</summary>
     public static readonly Version MinGameVersion = new(14, 2, 0);

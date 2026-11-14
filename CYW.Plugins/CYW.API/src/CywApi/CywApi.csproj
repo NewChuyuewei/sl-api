@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>0CywApi</AssemblyName>
@@ -31,15 +30,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- BLD-006: publicized by design — the framework's game-side patch surface for
+         [CywPatch] classes, which target game internals that have no public route.
+         Verified 2026-11-14: the current code set compiles without publicization; the
+         surface is retained deliberately as a declared policy (framework patch surface). -->
     <Reference Include="Assembly-CSharp" Publicize="true">
       <HintPath>$(SL_REFERENCES)\Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <!-- BLD-006: retained with Assembly-CSharp under the same game patch-surface policy —
+         first-pass game code (MEC coroutines, Discord, Unity standard assets). -->
     <Reference Include="Assembly-CSharp-firstpass" Publicize="true">
       <HintPath>$(SL_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="LabApi" Publicize="true">
+    <!-- BLD-006: intentionally NOT publicized — our code uses only the public LabAPI
+         surface (build green with publicization removed, verified 2026-11-14); depending
+         on LabAPI internals is explicitly avoided. -->
+    <Reference Include="LabApi">
       <HintPath>$(SL_REFERENCES)\LabApi.dll</HintPath>
       <Private>false</Private>
     </Reference>
@@ -51,6 +59,8 @@
       <HintPath>$(SL_REFERENCES)\Mirror.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <!-- BLD-006: retained with Assembly-CSharp under the same game patch-surface policy —
+         shared game infrastructure. -->
     <Reference Include="NorthwoodLib" Publicize="true">
       <HintPath>$(SL_REFERENCES)\NorthwoodLib.dll</HintPath>
       <Private>false</Private>
