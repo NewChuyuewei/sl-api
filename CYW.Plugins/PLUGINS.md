@@ -24,7 +24,7 @@
 | `CYW.NetOptimizer/` | — | 网络优化 | M8 | 🚧 |
 | `CYW.MemoryManager/` | — | 内存管理 | M8 | 🚧 |
 | `CYW.EntityManager/` | — | 实体管理 | M8 | 🚧 |
-| `CYW.Printer/` | — | 输出/打印工具 | M8 | 🚧 |
+| `CYW.Printer/` | — | **接替 LocalAdmin 的控制台打印输出**（对标 `--printStd` 角色） | M8 | 🚧 |
 | `CYW.LoadController/` | — | 加载顺序控制 | M8 | 🚧 |
 
 ## 约定

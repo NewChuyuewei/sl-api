@@ -227,7 +227,8 @@
 - [ ] 8.1 Profiler（性能剖析：模块/补丁/事件订阅者耗时）
 - [ ] 8.2 Scheduler（调度器：任务队列 / tick 分片）
 - [ ] 8.3 NetOptimizer（网络优化）
-- [ ] 8.4 其余按需取舍：MemoryManager / EntityManager / Printer / LoadController（评审决定去留）
+- [ ] 8.4 Printer：**接替 LocalAdmin 的控制台打印输出**（`--printStd` 角色；方案待设计）
+- [ ] 8.5 其余按需取舍：MemoryManager / EntityManager / LoadController（评审决定去留）
 - [ ] CP8：按需交付清单确定，交付项实机验证
 
 ### Phase 9：EXILED 退役验收（v1.1 新增，P0，发布 v1.0）
@@ -292,3 +293,6 @@
   - `AGENTS.md`：并入 SCP:SL Skills & SubAgents 使用规范（A 项目规则 / B 技能套件与代理团队：B1 目标与版本、B2 团队表、B3 不可协商项、B4 工作方式）。
   - 工具链显式钉住：**C# 14**（`LangVersion=14.0`）+ **.NET 10 SDK**（根级 `global.json`，10.0 特性带）；目标框架保持 `net48`。
   - `.opencode/`（17 技能 + 11 代理）与 `opencode.jsonc` 解除忽略、随仓库发布（发布前安全扫描通过）。
+- **2026-11-14（计划澄清：CYW.Printer 定位）**
+  - 按用户指示登记：**`CYW.Printer` = 接替 LocalAdmin 的控制台打印输出**（`--printStd` 角色；方案待设计）。
+  - 同步更新：plan.md（§1.5 能力矩阵 / §5.2 子系统表 / §5.3 Phase 8）、PLUGINS.md（M8 行）、本文件 Phase 8（8.4 独立成项）。

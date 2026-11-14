@@ -72,7 +72,7 @@
 | Exiled.CreditTags | 名牌/头衔 | `CYW.NameTag` | **M7b** | 🚧 |
 | Exiled.Loader | 加载器与生态协议（第三方依赖） | `CYW.Loader`（互操作 API 程序集） | **M7c** | 🚧 |
 | Exiled.Installer | 安装器工具 | `CYW.Installer` | **M7d** | 🚧 |
-| （无对标，自研） | Profiler / Scheduler / NetOptimizer / MemoryManager / EntityManager / Printer / LoadController | 各自目录（按需取舍） | M8 | 🚧 |
+| （无对标，自研） | Profiler / Scheduler / NetOptimizer / MemoryManager / EntityManager / **Printer（接替 LocalAdmin 的控制台打印输出）** / LoadController | 各自目录（按需取舍） | M8 | 🚧 |
 
 ### EXILED 退役验收清单（Replacement Definition of Done）
 
@@ -177,7 +177,7 @@ M9 EXILED 退役验收 ─▶ CP9: §1.5 退役清单逐项签收 → v1.0
 | EXILED 对标：NameTag | Exiled.CreditTags 对标 | P2 | M7b | 名牌/头衔展示 |
 | EXILED 对标：Loader 生态协议 | Exiled.Loader 对标 | P1 | M7c | 版本化互操作 API + 依赖解析；触发 promotion rule 评审 |
 | EXILED 对标：Installer | Exiled.Installer 对标 | P2 | M7d | 安装/升级工具 |
-| 自研增强工具 | — | P3 | M8 | Profiler/Scheduler/NetOptimizer/MemoryManager/EntityManager/Printer/LoadController（按需） |
+| 自研增强工具 | — | P3 | M8 | Profiler/Scheduler/NetOptimizer/MemoryManager/EntityManager/LoadController（按需）；**Printer：接替 LocalAdmin 的控制台打印输出** |
 
 ### 5.3 Phase 3+ 滚动细化（到达该阶段时再拆成 T 级任务）
 
@@ -186,7 +186,7 @@ M9 EXILED 退役验收 ─▶ CP9: §1.5 退役清单逐项签收 → v1.0
 - **Phase 5 呈现与交互**：5a Hints（控制器/元素/补丁）→ 5b Settings → 5c RA API → 5d Toys/Prefabs/地图包装 → 5e 语音（可选，默认最后）
 - **Phase 6 打磨发布**：修复类补丁按需 → 文档（README/API XML/教程）→ 示例插件 → CI 完善 → 发布清单 → v0.1
 - **Phase 7 EXILED 对标子系统**：7a Permissions（节点/组/继承 → 命令集成）→ 7b NameTag → 7c Loader 生态协议（互操作 API 拆分评审 + 依赖解析）→ 7d Installer
-- **Phase 8 自研增强工具**（按需）：Profiler → Scheduler → NetOptimizer → MemoryManager / EntityManager / Printer / LoadController
+- **Phase 8 自研增强工具**（按需）：Profiler → Scheduler → NetOptimizer → MemoryManager / EntityManager / LoadController；**Printer（接替 LocalAdmin 的控制台打印输出）**
 - **Phase 9 EXILED 退役验收**：§1.5 矩阵签收 → 退役清单 → 迁移对照表 → 性能基线 → v1.0
 
 ---
