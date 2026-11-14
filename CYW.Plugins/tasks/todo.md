@@ -296,3 +296,9 @@
 - **2026-11-14（计划澄清：CYW.Printer 定位）**
   - 按用户指示登记：**`CYW.Printer` = 接替 LocalAdmin 的控制台打印输出**（`--printStd` 角色；方案待设计）。
   - 同步更新：plan.md（§1.5 能力矩阵 / §5.2 子系统表 / §5.3 Phase 8）、PLUGINS.md（M8 行）、本文件 Phase 8（8.4 独立成项）。
+- **2026-11-14（质量加固战役：审计 + 修复批次 A 落地）**
+  - 审计（并行只读）：RV2 五轴评审 + SEC1 安全审计，双报告交叉印证。核心发现：CMP-003 注入时机被 LabAPI 覆盖（双重确认）、补丁器信任/审计缺口、日志控制字符直通（M2 前必闭）、LangVersion 越权覆盖、IsTransparent 误报风险（用户裁决：保留 true + M2 门禁）。
+  - 需求登记：`requirements.md` v1.1（LOG-005、PAT-007~009、MOD-005、BLD-005~006、CMP-003 修订）+ CMP-004 门禁 + OBS-2 备注；`AGENTS.md` 状态修正（OBS-4）。
+  - 修复批次 A（`fc25d5a`）：CMP-003 改挂 `ServerEvents.PluginsEnabled`（源码级验证触发晚于覆盖）、补丁器韧性/契约/审计线（PAT-007~009）、模块守卫（MOD-005）、LangVersion 单一来源（BLD-005）、LabApi publicize 移除（BLD-006）；构建 0/0 + 26/26 + 指挥官复验（重建 SHA 与编码者一致 `AD36834A...`）。
+  - 修复批次 B（运行中）：LOG-005 日志净化（Core `ControlCharFilter` + `EscapeData` + 单测）+ 身份元数据 6 处（chuyuewei）。
+  - 环境事件：子代理模型端点 DNS 故障 1 次（批次 A 重发恢复）；shell 扫描器对双破折号连写敏感（规避法已掌握）。
