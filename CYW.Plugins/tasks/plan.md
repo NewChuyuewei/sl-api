@@ -103,7 +103,7 @@
 
 | # | 决策 | 理由 |
 |---|---|---|
-| D1 | **LabAPI 库插件形态**：net48、`AssemblyName=0CywApi`、`LoadPriority.Highest`、`IsTransparent=true` | 0 前缀+HIGHEST 保证最先加载（生态惯例，参考 README 强调"不许改名"的约束）；LabAPI 为官方框架、随服务器分发 |
+| D1 | **LabAPI 库插件形态**：net48、`AssemblyName=0CywApi`、`LoadPriority.Highest`、`IsTransparent=true` | 0 前缀+HIGHEST 保证最先加载（生态惯例，参考 README 强调"不许改名"的约束）；LabAPI 为官方框架、随服务器分发。**2026-11-14 用户裁决（RV2-01）**：M1 保持 `IsTransparent=true`（零侵入性补丁下成立）；侵入性补丁（M2 D4）落地前硬门禁复评并预期切换 `false`（见 CYWS-CMP-004） |
 | D2 | **参考重写纪律**（见 §1） | 规避无许可证代码的版权风险；保证可公开发布 |
 | D3 | **命名**：root namespace `CywApi.*`；程序集 `0CywApi`；插件 `Name="CywApi"`（品牌名 CYW's API 用于 Description/日志，避免带撇号的配置目录名）；起始版本 `0.1.0` | 配置目录为 `configs/<port>/<Name>/`，撇号/空格会带来路径与工具链摩擦 |
 | D4 | **玩家策略**：`CywPlayer : Player`（LabAPI Player 子类）+ 构造/移除替换补丁（等效 ExPlayer） | 参照对象的核心卖点：全生态拿到的都是增强 Player。风险隔离：单独补丁类、空值防护、文档声明；备选方案（并行注册表）已记录——侵入性低但插件无法自然获得 CywPlayer |

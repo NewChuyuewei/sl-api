@@ -1,6 +1,6 @@
 # 需求规格（Requirements Specification）
 
-> 文档编号：**CYWS-REQ-001** ｜ 版本：v1.1（2026-11-14，质量加固战役登记：LOG-005、PAT-007~009、MOD-005、BLD-005~006、CMP-003 变更） ｜ 基准：见 `docs/lifecycle/README.md` §配置管理
+> 文档编号：**CYWS-REQ-001** ｜ 版本：v1.1（2026-11-14，质量加固战役登记：LOG-005、PAT-007~009、MOD-005、BLD-005~006、CMP-003 变更、CMP-004 门禁） ｜ 基准：见 `docs/lifecycle/README.md` §配置管理
 > 方法：DO-178C 等比缩放（适用性声明见 `docs/lifecycle/README.md`）。
 > 验证方法图例：**T** = 离服单元测试 ｜ **D** = 实机演示（目标环境验证） ｜ **R** = 审查 ｜ **A** = 分析
 > 验证证据编号（VR-xxx）对应 `docs/lifecycle/verification-records.md`。
@@ -20,6 +20,8 @@
 | CYWS-HLR-006 | 框架校验游戏版本并在越界时告警而不崩溃；将框架版本注入服务器 BuildInfo | D/T | ✅ 已满足 |
 | CYWS-HLR-007 | 框架的纯逻辑层（Core）可在离开游戏服务器的环境中独立构建与单元测试，并与需求双向追溯 | T/R | ✅ 已满足 |
 | CYWS-HLR-008 | 开发/构建/部署/验证环境可复现：脚本化构建部署、固定工具链版本、文档化的目标环境 | D/R | ✅ 已满足 |
+
+> 备注（2026-11-14，评审 OBS-2）：HLR-001 的最先加载与启用语义依赖 `LoadPriority.Highest` + `0` 文件名前缀约定；LabAPI 对同优先级插件按发现顺序启用（非契约保证）。M2 若需要 CYW 最先注册的硬保证，必须显式验证该假设。
 
 ## 2. 低层需求（LLR）
 
@@ -77,6 +79,8 @@
 | CYWS-CMP-002 | 版本低于最小支持版本（14.2.0）时输出醒目警告且不崩溃、不阻断启用 | `VersionRange`（Core）+ `CompatibilityModule` | D/T | VR-005（99.0.0 越界警告）、VR-002（VersionRange 5 用例） | ✅ |
 | CYWS-CMP-003 | BuildInfo 注入为幂等（重复启用不重复追加），且注入行在**最终** `buildinfo` 输出中可见（须在 LabAPI `AddPluginsToBuildInfo` 覆盖之后写入；经 `ServerEvents.PluginsEnabled` 或等价后置时机） | `CompatibilityModule`（后置注入） | D | **原证据失实**：仅启用瞬时可见、被 LabAPI 覆盖（RV2-02 + 安全审计双重确认）→ 待重新演示 | 🔧 |
 
+| CYWS-CMP-004 | 服务器透明性声明门禁：`IsTransparent` 在零侵入性补丁阶段保持 `true`；任何侵入性补丁（M2 D4 玩家替换等）落地前必须复评并预期切换为 `false` | `CywPlugin.cs` | R/D | 用户裁决 2026-11-14（RV2-01） | ⏳ M2 门禁 |
+
 ### 2.6 构建与生命周期（BLD）
 
 | ID | 低层需求 | 实现 | 验证方法 | 验证证据 | 状态 |
@@ -95,7 +99,7 @@
 
 | 源文件 | 覆盖需求 |
 |---|---|
-| `CYW.API/src/CywApi/CywPlugin.cs` | HLR-001/002（入口）、MOD-001 |
+| `CYW.API/src/CywApi/CywPlugin.cs` | HLR-001/002（入口）、MOD-001、CMP-004 |
 | `CYW.API/src/CywApi/CywConfig.cs` | HLR-002、CFG-001~004 |
 | `CYW.API/src/CywApi/CywLog.cs` | HLR-003、LOG-001/003/004/005 |
 | `CYW.API/src/CywApi/CywVersion.cs` | CMP-002 |
