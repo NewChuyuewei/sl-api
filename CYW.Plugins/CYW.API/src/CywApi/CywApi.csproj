@@ -8,9 +8,9 @@
     <RootNamespace>CywApi</RootNamespace>
     <Version>0.1.0</Version>
     <Title>CYW's API</Title>
-    <Authors>CYW</Authors>
+    <Authors>chuyuewei</Authors>
     <Description>CYW's API - an extension framework for the LabAPI modding framework (SCP:SL). Independent implementation inspired by LabExtended.</Description>
-    <Copyright>Copyright (c) 2026 CYW</Copyright>
+    <Copyright>Copyright (c) 2026 chuyuewei</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

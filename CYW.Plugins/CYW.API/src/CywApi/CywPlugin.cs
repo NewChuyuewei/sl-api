@@ -23,7 +23,7 @@ public sealed class CywPlugin : Plugin<CywConfig>
     public override string Description => "CYW's API - an extension framework for LabAPI (independent implementation inspired by LabExtended).";
 
     /// <inheritdoc/>
-    public override string Author => "CYW";
+    public override string Author => "chuyuewei";
 
     /// <inheritdoc/>
     public override Version Version { get; } = CywVersion.Current;

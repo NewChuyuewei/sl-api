@@ -27,8 +27,8 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\</OutputPath>
     <Version Condition="'$(Version)' == ''">0.1.0</Version>
-    <Authors>CYW</Authors>
-    <Company>CYW</Company>
+    <Authors>chuyuewei</Authors>
+    <Company>chuyuewei</Company>
     <Product>CYW's Plugins</Product>
   </PropertyGroup>
 
