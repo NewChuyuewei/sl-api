@@ -30,10 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- BLD-006: publicized by design — the framework's game-side patch surface for
-         [CywPatch] classes, which target game internals that have no public route.
-         Verified 2026-11-14: the current code set compiles without publicization; the
-         surface is retained deliberately as a declared policy (framework patch surface). -->
+    <!-- BLD-006: publicized by design — retained as declared policy for the future
+         game-side patch surface (M2+ [CywPatch] classes will target game internals
+         that have no public route). Currently unused: verified 2026-11-14 that the
+         current code set compiles without publicization (RV3-01 reword). -->
     <Reference Include="Assembly-CSharp" Publicize="true">
       <HintPath>$(SL_REFERENCES)\Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
