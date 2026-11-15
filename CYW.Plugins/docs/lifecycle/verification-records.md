@@ -1,6 +1,6 @@
 # 验证记录（Verification Records）
 
-> 文档编号：**CYWS-VR-001** ｜ 更新：2026-11-08
+> 文档编号：**CYWS-VR-001** ｜ 更新：2026-11-15
 > 格式说明：每条记录含 **ID / 方法 / 环境 / 命令或步骤 / 结果 / 证据摘录 / 结论**。
 > 方法图例：T 单测 ｜ D 实机演示 ｜ R 审查 ｜ A 分析。需求映射见 `requirements.md`。
 
@@ -156,3 +156,53 @@
   - `deploy.ps1 -SkipBuild` → 目录复制落位 `LabAPI\{plugins\global, dependencies\global}` ✓（免解压往返）
   - CI：`upload-artifact` 改上传 `CYW.Plugins/dist/release` → 下载的 artifact 即单层（根为 `plugins/ + dependencies/`）
   - 修复提交 `daf5d04`；**远端复核（2026-11-09）**：run #5（`daf5d04`）/ run #6（`719a174`）全绿；下载 run #5 artifact 解包 → 根即 `plugins/` + `dependencies/` + `README-INSTALL.txt`（**单层确认**）——该发现闭环
+
+## VR-011 质量加固战役 QA 轮：构建 / 单测 / 覆盖率（T）— 2026-11-15 13:10
+
+- **基线**：战役代码（`fc25d5a` + `90ae9c4` + `c7da147`）
+- **命令与结果**：
+  - `dotnet build CywApi.slnx -c Release --no-incremental` → **0 警告 / 0 错误**
+  - `dotnet test CywApi.slnx -c Release --no-build` → **45/45 通过**（36 Fact + 1 Theory 含 9 InlineData，静态清点与运行时计数精确一致）
+  - 覆盖率（coverlet/cobertura）→ **行 113/113 = 100%**；**分支 90/92 = 97.83%**（较基线提升；未覆盖 2 点 = `CywPatchFilter` 历史缺口，已登记 CONSTRAINTS）
+  - 双次 `--no-incremental` 重建字节一致；最终工件 SHA256 `8C744868C0F2896C06641D843EF76852373AEB0F2D49B99D70C030D810965030`（bin=dist=部署=zip 条目）
+- **补充（CI 外部证据）**：runs #11（`fc25d5a`）/ #13（`c7da147`，含全部战役代码）/ #14（`77d4d52`）/ #15（`045777c`）全绿
+- **映射**：BLD-004、HLR-007、CONSTRAINTS 棘轮（45 / 113-113 / 90-92）
+- **结论**：✅ 通过
+
+## VR-012 实机演示 #5：S1 启动+启用+CMP-003 修复验证（D）— 2026-11-15 13:36
+
+- **环境**：SCP:SL 14.2.9 专用服务器（LocalAdmin 7777，headless，0 玩家）
+- **证据摘录**：
+  - 加载链 `Successfully loaded 0Harmony / CywApi.Core / CywApi`
+  - `Successfully enabled 'CywApi', Version: 0.1.0, Author: 'chuyuewei'`（身份变更实机可见）
+  - `[compat] plugins enabled` 行后 **`build info updated` 出现 2 次** = CMP-003 后置重注入执行的双标记
+  - 启动 Mod Description 块含 `- CywApi by chuyuewei [0.1.0]: ...` 与 `CYW's API v0.1.0`（最终输出含注入行，用户可见半达成）
+  - `[modules] 2/2 enabled`；全日志零异常
+- **映射**：CMP-003（修订后）、CMP-004（IsTransparent 现状符合裁决）、身份元数据
+- **结论**：✅ 通过
+
+## VR-013 实机演示 #6：S2 LOG-005 活体探针 + 清理证明（D）— 2026-11-15 17:14
+
+- **方法**：`TEMP-VERIFY` 探针（ESC/CR/BEL/C1/LF 构造串）→ 构建/部署/启动捕获 → `git checkout` 移除 → 重建 → 清洁证明（依 A1-5 纪律）
+- **证据摘录**：
+  - 探针输出行（节选）：`TEMP-PROBE esc[?[31m] cr[?] bel[?] c1[\u009B] lf-ok`（第二行 `TEMP-PROBE line2`，LF 保留）
+  - 归因裁决：C1 以字面 `\u009B` 呈现 = 插件层净化实锤；ESC/CR/BEL 显示为 `?`（内存为控制图形符 U+241B 等，单测证明；GB2312 控制台写出层对不可映射字形降级）。**安全属性达成**：零原始控制字节、零异常；"统一为 \uXXXX 字面表示"列为可选精化
+  - 清理证明：树洁净；`TEMP-VERIFY`/`TEMP-PROBE` 在源码/部署/bin/dist/zip 全零；重建 SHA256 与 dist/部署/zip 条目字节一致
+- **映射**：LOG-005（D 半）、CONSTRAINTS 临时代码纪律
+- **结论**：✅ 通过
+
+## VR-014 实机演示 #7：S3 禁用周期（D）— 2026-11-15 18:06 / 18:16
+
+- **步骤 A（is_enabled: false）**：插件加载但零运行时输出（无 banner/modules/patcher/compat 行）、零异常
+- **步骤 B（恢复 true）**：完整启用链回归（banner → compat 14.2.9 → modules 2/2 → enabled，Author: chuyuewei）；零异常；无 TEMP-PROBE 输出（清洁构建确认）
+- **映射**：HLR-001（禁用边界）、G1 生命周期家族、MOD-005 禁用路径回归
+- **备注**：LabAPI 1.1.7 无热重载，周期为跨两次启动语义
+- **结论**：✅ 通过
+
+## VR-015 独立复评：RV3（R）— 2026-11-15
+
+- **范围**：批次 A+B 全部修复对照 requirements v1.1；历史发现 RV2-01 至 RV2-17 / SEC1 全项处置核对
+- **结论摘要**：**Approve-with-fixes**；修复逐项 verify 通过；2 Minor（RV3-01 注释措辞，修复于 `cda3d58` 且重建字节恒等；RV3-02 措辞建议，免处理）；无 Blocker；生命周期对称判定通过
+- **按设计保留开放**：RV2-07（配置文档以 XML 注释承担）、RV2-17（补丁层离服测试按 D14 不做）、SEC1-03（异常日志策略文档化，随文档轮）
+- **UNVERIFIED 要点**：`example/` 为 master 线索 vs 发布版 1.1.7（由 VR-012 实机裁决）；Harmony API 形状以用法一致性核实
+- **结论**：✅ 通过（含 RV3-01 修复闭环）
