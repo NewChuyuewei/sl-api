@@ -19,7 +19,7 @@
 | 维度 | 规则 | 检查命令 | 运行时机 |
 |---|---|---|---|
 | 构建 | 0 警告 0 错误 | `dotnet build CywApi.slnx -c Release --no-incremental` | 每次改动 |
-| 单元测试 | 全部通过且数量不得下降（当前 **26**） | `dotnet test "CYW.Plugins/tests/CywApi.Tests" -c Release` | 每次改动 |
+| 单元测试 | 全部通过且数量不得下降（当前 **45**） | `dotnet test "CYW.Plugins/tests/CywApi.Tests" -c Release` | 每次改动 |
 | Core 行覆盖率 | 不得低于实测（当前 **100%**，81/81） | `dotnet test ... --collect:"XPlat Code Coverage"` + 解析 cobertura | 任务结束 |
 | Core 分支覆盖率 | 不得低于实测（当前 **97.05%**，66/68） | 同上 | 任务结束 |
 | 依赖漏洞（外部） | 无 High/Critical | `dotnet list CywApi.slnx package --vulnerable --include-transitive` | 发布前/CI |

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using CywApi.Core.Colors;
+using CywApi.Core.Logging;
 using LabApi.Features.Console;
 
 namespace CywApi;
@@ -8,7 +9,7 @@ namespace CywApi;
 /// Framework logger: gates debug output, renders optional ANSI colors and can prepend the
 /// source assembly name. All CYW's API code logs through this class.
 /// </summary>
-/// <remarks>Requirements: CYWS-HLR-003, CYWS-LOG-001, CYWS-LOG-003.</remarks>
+/// <remarks>Requirements: CYWS-HLR-003, CYWS-LOG-001, CYWS-LOG-003, CYWS-LOG-005.</remarks>
 public static class CywLog
 {
     /// <summary>Writes a debug line — only when debugging is enabled in the config.</summary>
@@ -30,13 +31,30 @@ public static class CywLog
     public static void Error(string message) => Logger.Error(Format(message));
 
     /// <summary>
-    /// Formats a message according to the config: color codes are converted to ANSI escapes
-    /// (or stripped when colors are off), and the source assembly name can be prepended.
+    /// Escapes every control character in an untrusted data string — including LF and CR —
+    /// into a visible representation before it is embedded into a log message, so the value
+    /// can never inject terminal control sequences or forge log lines.
+    /// </summary>
+    /// <remarks>
+    /// Log messages passed to this class are rendered as formatting-capable text
+    /// (<c>&amp;x</c> color codes are converted to ANSI escapes); every string that originates
+    /// from players, plugin code, or configuration data MUST be passed through this method
+    /// before being embedded into a log message. Null and empty input are returned unchanged.
+    /// </remarks>
+    /// <param name="value">The untrusted/data string to escape; may be null.</param>
+    /// <returns>The escaped text, or the input unchanged when null, empty, or control-free.</returns>
+    public static string? EscapeData(string? value) => ControlCharFilter.EscapeData(value);
+
+    /// <summary>
+    /// Formats a message according to the config: raw control characters are neutralized first
+    /// (CYWS-LOG-005 choke-point, before color handling so generated ANSI is unaffected), color
+    /// codes are then converted to ANSI escapes (or stripped when colors are off), and the
+    /// source assembly name can be prepended.
     /// </summary>
     public static string Format(string message)
     {
         var config = CywPlugin.Instance?.Config;
-        var text = message ?? string.Empty;
+        var text = ControlCharFilter.Neutralize(message ?? string.Empty) ?? string.Empty;
 
         if (config != null && config.Log.UseColors)
             text = AnsiColorParser.ToAnsi(text) ?? string.Empty;
