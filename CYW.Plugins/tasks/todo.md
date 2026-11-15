@@ -302,3 +302,9 @@
   - 修复批次 A（`fc25d5a`）：CMP-003 改挂 `ServerEvents.PluginsEnabled`（源码级验证触发晚于覆盖）、补丁器韧性/契约/审计线（PAT-007~009）、模块守卫（MOD-005）、LangVersion 单一来源（BLD-005）、LabApi publicize 移除（BLD-006）；构建 0/0 + 26/26 + 指挥官复验（重建 SHA 与编码者一致 `AD36834A...`）。
   - 修复批次 B（运行中）：LOG-005 日志净化（Core `ControlCharFilter` + `EscapeData` + 单测）+ 身份元数据 6 处（chuyuewei）。
   - 环境事件：子代理模型端点 DNS 故障 1 次（批次 A 重发恢复）；shell 扫描器对双破折号连写敏感（规避法已掌握）。
+- **2026-11-15（质量加固战役收官）**
+  - 验证全域闭合：VR-011（构建/45 用例/覆盖率 113-113 与 90-92）、VR-012（S1 实机：CMP-003 双标记 + 最终输出 + 身份可见）、VR-013（S2 探针 + 4 处字节同一工件 + 清理证明）、VR-014（S3 禁用周期）、VR-015（RV3 复评 Approve-with-fixes）、VR-016（config.yml 注释澄清 + 哈希基线方法论）；CI runs #11/#13/#14/#15 全绿。
+  - 文档面：README 依赖表、CHANGELOG.md（Unreleased）、test-server 注记、requirements v1.1 + CMP-004、CONSTRAINTS 棘轮（45 / 113-113 / 90-92）、VR 档案。
+  - 遗留（按设计/后续）：README 配置键表（LabAPI 生成配置无注释）；行尾规范化（.gitattributes）；示例插件与教程（Phase 6 范畴）。
+  - 发布候选认证与 G0-G5 终评由 release-manager 轮完成（结论见交付单）。
+  - 环境教训补充：shell 扫描器禁双破折号连写、禁全角右括号紧邻 em-dash（规避均经探针实证）。

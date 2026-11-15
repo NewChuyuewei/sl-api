@@ -206,3 +206,10 @@
 - **按设计保留开放**：RV2-07（配置文档以 XML 注释承担）、RV2-17（补丁层离服测试按 D14 不做）、SEC1-03（异常日志策略文档化，随文档轮）
 - **UNVERIFIED 要点**：`example/` 为 master 线索 vs 发布版 1.1.7（由 VR-012 实机裁决）；Harmony API 形状以用法一致性核实
 - **结论**：✅ 通过（含 RV3-01 修复闭环）
+
+## VR-016 澄清记录：config.yml 注释机制 + 工件哈希基线（A）— 2026-11-15
+
+- **S4 澄清（闭合 RV2 评审 UNVERIFIED#1）**：读取部署产物 `configs/7777/CywApi/config.yml`（134 字节）：LabAPI 1.1.7 生成的配置不含任何注释（XML 文档注释与 Description 均不渲染；纯键值序列化）。键说明职责改由 README 配置表承担（后续文档项）。
+- **工件哈希基线澄清**：构建为同 HEAD 确定性（受控实验：同一 HEAD 下 csproj 注释变更前后字节恒等 `47144720...`）；哈希随提交变化系因 SDK 将 HEAD SHA 嵌入 `AssemblyInformationalVersion`。三个证据工件 `D7D621A1...`（HEAD `77d4d52`）/ `8C744868...`（HEAD `045777c`）/ `47144720A47D2824C153EAB235D88EA602ED1861EF8270B2CEFCB3B4D13792C3`（HEAD `5adb18a`）之间**零 .cs 变化**（git diff --name-status 逐段核实）→ 行为等价；发布候选将在 RM 阶段以最终 HEAD 重新构建并实机冒烟认证。
+- **映射**：RV2 UNVERIFIED#1（闭合）、QA/CI 哈希一致性方法论
+- **结论**：✅ 记录归档
