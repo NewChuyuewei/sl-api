@@ -21,7 +21,7 @@
   <ItemGroup>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
-    <!-- Lib.Harmony 2.2.2：与目标服务器随附的 0Harmony 版本一致（2026-11-08 实机验证） -->
+    <!-- Lib.Harmony 2.2.2：经本框架随包分发；版本与实机加载的 0Harmony 一致（2026-11-08 验证；服务器不自带 Harmony） -->
     <PackageReference Include="Lib.Harmony" Version="2.2.2" PrivateAssets="all" />
   </ItemGroup>
 
