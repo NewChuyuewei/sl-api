@@ -1,6 +1,6 @@
 # Constraints（质量护栏）
 
-> 最后评审：**2026-11-08**（DO-178C 优化轮）｜配套过程框架见 [`docs/lifecycle/`](docs/lifecycle/)
+> 最后评审：**2026-11-15**（质量加固战役 QA 更新）｜配套过程框架见 [`docs/lifecycle/`](docs/lifecycle/)
 > 规则：撰写代码前阅读本文件；**不得为了让某个改动通过而弱化本文件**。
 > 收紧（提升标准）应保持安静；放松（降低标准）必须显式评审并登记。
 
@@ -20,8 +20,8 @@
 |---|---|---|---|
 | 构建 | 0 警告 0 错误 | `dotnet build CywApi.slnx -c Release --no-incremental` | 每次改动 |
 | 单元测试 | 全部通过且数量不得下降（当前 **45**） | `dotnet test "CYW.Plugins/tests/CywApi.Tests" -c Release` | 每次改动 |
-| Core 行覆盖率 | 不得低于实测（当前 **100%**，81/81） | `dotnet test ... --collect:"XPlat Code Coverage"` + 解析 cobertura | 任务结束 |
-| Core 分支覆盖率 | 不得低于实测（当前 **97.05%**，66/68） | 同上 | 任务结束 |
+| Core 行覆盖率 | 不得低于实测（当前 **100%**，113/113） | `dotnet test ... --collect:"XPlat Code Coverage"` + 解析 cobertura | 任务结束 |
+| Core 分支覆盖率 | 不得低于实测（当前 **97.83%**，90/92） | 同上 | 任务结束 |
 | 依赖漏洞（外部） | 无 High/Critical | `dotnet list CywApi.slnx package --vulnerable --include-transitive` | 发布前/CI |
 | 实机演示（外部） | 每个基线必须有真实服务器演示证据 | `LocalAdmin` 冒烟流程（见 `CYW.Plugins/docs/dev/test-server.md`） | 每个检查点 |
 | 发布包 | 每个基线产出一个可部署 zip | `pwsh "CYW.Plugins/packaging.ps1"` → `dist/CYW-Plugins.zip` | 每个检查点 |
@@ -29,15 +29,17 @@
 
 > 环境前置：`$env:SL_REFERENCES = '<服务端>\SCPSL_Data\Managed'`
 
-## 实测记录（棘轮基准，2026-11-08）
+## 实测记录（棘轮基准；基线 2026-11-08，2026-11-15 更新）
 
 | 指标 | 当前值 | 方向 |
 |---|---|---|
-| Core 行覆盖 | 81/81 = **100%** | 不得下降 |
-| Core 分支覆盖 | 66/68 = **97.05%** | 不得下降 |
-| 单元测试数 | **26** | 不得下降 |
+| Core 行覆盖 | 113/113 = **100%** | 不得下降 |
+| Core 分支覆盖 | 90/92 = **97.83%** | 不得下降 |
+| 单元测试数 | **45** | 不得下降 |
 | 构建警告 | **0** | 不得上升 |
 | 依赖漏洞（High+） | **0** | 不得出现 |
+
+> 已知缺口（2026-11-15 复测）：`CywPatchFilter.cs` 的 `patterns[i]?.Trim() ?? ""` null 分支 2 点未覆盖（历史遗留；补测提升时一并处理）。
 
 ## 例外
 
