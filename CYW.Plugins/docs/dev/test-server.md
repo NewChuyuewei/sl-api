@@ -66,3 +66,23 @@ LocalAdmin 实际传给 `SCPSL.exe` 的参数（官方格式，供参考）：
    - 无 Exception/ERROR
    - （可选）进服完整回合 → 重启 → 无残留
 ```
+
+## 6. 读取日志与命令等价形式
+
+> 2026-11-15 补充（实测环境差异）。
+
+- **日志编码**：冒烟脚本的测试服输出写入 `%TEMP%\la-test-stdout.log`，文件按**本机 ANSI 代码页**编码
+  （中文 Windows 上为 GB2312）。按 UTF-8 直读会乱码，请用 `Get-Content -Encoding Default`：
+
+  ```powershell
+  Get-Content "$env:TEMP\la-test-stdout.log" -Encoding Default -Tail 100
+  ```
+
+  需要显式固定代码页时用 936：`[IO.File]::ReadAllLines($path, [Text.Encoding]::GetEncoding(936))`。
+
+- **没有 `pwsh` 时**：本手册与 README 中的 `pwsh` 命令可用 Windows PowerShell 5.1 等价形式执行
+  `powershell -NoProfile -ExecutionPolicy Bypass -File "<script>"`，例如 §5 第 1 步：
+
+  ```powershell
+  powershell -NoProfile -ExecutionPolicy Bypass -File "CYW.Plugins/build.ps1"
+  ```

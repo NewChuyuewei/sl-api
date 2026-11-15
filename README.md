@@ -30,6 +30,10 @@ pwsh "CYW.Plugins/build.ps1"          # 还原 + Release 构建 + 全部单测
 pwsh "CYW.Plugins/packaging.ps1"      # 构建 + 打包 → CYW.Plugins/dist/CYW-Plugins.zip
 ```
 
+> 未安装 `pwsh`（PowerShell 7）时，以上命令的等价形式（Windows PowerShell 5.1）为
+> `powershell -NoProfile -ExecutionPolicy Bypass -File "<script>"`——例如
+> `powershell -NoProfile -ExecutionPolicy Bypass -File "CYW.Plugins/build.ps1"`。
+
 ## 部署
 
 把 `CYW-Plugins.zip` **解压到 LabAPI 目录**（`%APPDATA%\SCP Secret Laboratory\LabAPI\`，或含 `LabAPI` 的服务端根）——
@@ -40,6 +44,21 @@ zip 内部即 LabAPI 布局（`plugins/global/` + `dependencies/global/`），**
 ```powershell
 powershell -File "CYW.Plugins/scripts/dev/deploy.ps1"
 ```
+
+## 依赖与第三方
+
+发布包（`dist/CYW-Plugins.zip`，与 `dist/release/` 同内容的**单层** zip）**只包含插件本体、第一方 Core 与 0Harmony**——
+不含任何游戏 / 框架 DLL（`LabApi.dll`、`Assembly-CSharp*.dll` 等由服务端自身提供，绝不随包分发）：
+
+| zip 内路径 | 组件 | 版本 | 为什么需要 |
+|---|---|---|---|
+| `plugins/global/0CywApi.dll` | 框架插件本体（`CYW's API`） | 0.1.0 | LabAPI 插件入口 |
+| `dependencies/global/CywApi.Core.dll` | 第一方纯逻辑层 | 0.1.0 | 日志净化 / 补丁过滤 / ANSI 颜色 / 版本兼容等纯逻辑——离服可单测；不引用 LabAPI / 游戏程序集 |
+| `dependencies/global/0Harmony.dll` | Lib.Harmony | **2.2.2** | Harmony 补丁运行时——**SCP:SL 服务端不自带 Harmony，必须随包提供**；版本与实机加载日志一致 |
+
+构建 / 测试专用依赖（**从不进入发布包**）：`BepInEx.AssemblyPublicizer.MSBuild` 0.4.3、
+`Microsoft.NETFramework.ReferenceAssemblies` 1.0.3、`xunit` 2.9.2、`xunit.runner.visualstudio` 2.8.2、
+`Microsoft.NET.Test.Sdk` 17.11.1、`coverlet.collector` 6.0.4。
 
 ## 状态
 
