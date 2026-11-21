@@ -7,9 +7,9 @@
 
 ## [Unreleased]
 
-> 2026-11-15 质量加固专项（quality-hardening campaign）· 构建 `8C744868C0F2896C06641D843EF76852373AEB0F2D49B99D70C030D810965030` 实机场景 S1–S3 验证通过（零异常）。
+> 2026-11-15 质量加固专项（quality-hardening campaign）：S1–S3 已在**该轮历史 QA 工件**上通过实机验证（VR-012～VR-014，零异常）。文档变更后将重新构建最终候选；最终候选的完整 QA 尚未签署。
 
-**⚠ Owner action**：本轮无配置键 / 权限节点 / 内容 ID 变更；README 新增「依赖与第三方」一节——手工部署（直接拷贝 DLL）的服务器请对照该表核对 `0CywApi.dll`、`CywApi.Core.dll`、`0Harmony.dll` 均已就位。
+**⚠ Owner action**：本轮无配置键 / 权限节点 / 内容 ID 变更；README 新增「依赖与第三方」、完整配置键表与当前构建透明性说明——手工部署（直接拷贝 DLL）的服务器请对照依赖表核对 `0CywApi.dll`、`CywApi.Core.dll`、`0Harmony.dll` 均已就位。
 
 ### Fixed
 

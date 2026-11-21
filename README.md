@@ -5,6 +5,57 @@
 
 *An extension framework for the LabAPI modding framework (SCP:SL), built as an independent implementation inspired by [LabExtended](https://github.com/marchellcx/LabExtended). No LabExtended code is included in this project.*
 
+## 服务器所有者快速开始
+
+**运行基线**：CYW's API / Core **0.1.0**，需要 **LabAPI 1.1.7** 与 **SCP:SL 14.2.9** 专用服务器。本插件不是 EXILED 插件，不能在仅安装 EXILED 的服务器上运行。
+
+**Gameplay impact / transparency（仅当前 0.1.0 构建）**：当前启用 Compatibility 与 Patching 模块，提供游戏版本检查/告警、向最终 `buildinfo` / Mod-Description 添加框架版本行，以及框架日志和补丁管理。当前**未随附或应用任何补丁类**（实机汇总为 `+0 applied, 0 failed, 0 skipped`），不新增命令或权限节点、自定义角色/物品，不收集玩家数据，也不包含其他影响玩法的行为。因此 `CywPlugin.IsTransparent` 按 CMP-004 的用户裁决暂为 `true`；该声明只描述上述当前构建，不是对未来版本的透明性承诺。任何 M2 或其他影响玩法/侵入性功能落地前，必须重新评审此声明，并按门禁预期切换为 `false`。
+
+### 安装
+
+> **干净服务器安装验收：UNVERIFIED。** 下列目录布局已在开发测试服使用，但尚未完成“干净服务器上仅使用发布 zip”的完整安装验收；这不构成最终发布候选的 QA 签署。
+
+1. 将 `CYW-Plugins.zip` 解压到 LabAPI 目录（`%APPDATA%\SCP Secret Laboratory\LabAPI\`，或含 `LabAPI` 的服务端根）。zip 内部即 LabAPI 布局，无需再嵌套一层目录。
+2. 确认以下文件就位；第三方组件及版本见[依赖与第三方](#依赖与第三方)：
+   - `plugins/global/0CywApi.dll`
+   - `dependencies/global/CywApi.Core.dll`
+   - `dependencies/global/0Harmony.dll`
+3. 启动服务器。配置文件位于 `configs/<port>/CywApi/config.yml`（例如端口 7777 为 `configs/7777/CywApi/config.yml`），与插件的 `properties.yml` 同目录。
+4. 需要停用时，在同目录 `properties.yml` 设置 `is_enabled: false` 并重启服务器；恢复为 `true` 后再次重启即可重新启用。LabAPI 1.1.7 不提供本插件的热重载周期。
+
+本地开发循环（打包 + 解压到本机 LabAPI）：
+
+```powershell
+powershell -File "CYW.Plugins/scripts/dev/deploy.ps1"
+```
+
+> Windows `Compress-Archive` 生成的 zip 可能以 `\` 存储条目分隔符；非 Windows 系统的直接解压当前 **UNVERIFIED**。
+
+### 配置
+
+LabAPI 1.1.7 生成的 `config.yml` **不含键说明注释**，因此下表是服务器所有者的配置键参考。默认 YAML 形态为：
+
+```yaml
+debug: false
+log:
+  use_colors: true
+  prepend_source: false
+patches:
+  disabled: []
+compatibility:
+  check_game_version: true
+```
+
+| YAML 键 | 类型 | 默认值 | 作用 | 已确认的空值/损坏配置行为 |
+|---|---|---|---|---|
+| `debug` | `bool` | `false` | `true` 时输出框架 DEBUG 日志；`false` 时仅抑制 DEBUG，其他级别仍输出 | 整个 YAML 损坏时回退为 `false` |
+| `log.use_colors` | `bool` | `true` | 将框架日志中的 `&` 风格颜色码渲染为 ANSI 颜色 | `log:` 显式为 null 时，整个分区回退默认值，即 `true` |
+| `log.prepend_source` | `bool` | `false` | 在框架日志行前添加调用程序集名（框架自身程序集除外） | `log:` 显式为 null 时，整个分区回退默认值，即 `false` |
+| `patches.disabled` | `List<string>` | `[]` | 跳过指定 `[CywPatch]` 类；支持类全名/短名精确匹配，以及末尾 `.*` 的命名空间通配（如 `CywApi.Patches.*`）。当前构建无随附补丁类，因此默认没有补丁被跳过 | `patches:` 或 `disabled:` 显式为 null 时回退为空列表 `[]` |
+| `compatibility.check_game_version` | `bool` | `true` | 游戏版本低于支持范围时记录警告但不阻断启用；设为 `false` 可跳过该检查，不影响 BuildInfo 注入 | `compatibility:` 显式为 null 时，整个分区回退默认值，即 `true` |
+
+非法 YAML 会触发 LabAPI 加载器警告，随后使用全部默认值，框架仍照常启用。上述空值处理已验证；其他标量类型错误的逐项转换行为 **UNVERIFIED**，不要依赖其被自动纠正。
+
 ## 仓库结构
 
 ```text
@@ -34,17 +85,6 @@ pwsh "CYW.Plugins/packaging.ps1"      # 构建 + 打包 → CYW.Plugins/dist/CYW
 > `powershell -NoProfile -ExecutionPolicy Bypass -File "<script>"`——例如
 > `powershell -NoProfile -ExecutionPolicy Bypass -File "CYW.Plugins/build.ps1"`。
 
-## 部署
-
-把 `CYW-Plugins.zip` **解压到 LabAPI 目录**（`%APPDATA%\SCP Secret Laboratory\LabAPI\`，或含 `LabAPI` 的服务端根）——
-zip 内部即 LabAPI 布局（`plugins/global/` + `dependencies/global/`），**一次解压即完成全部插件部署**。
-
-本地开发循环（打包 + 解压到本机 LabAPI）：
-
-```powershell
-powershell -File "CYW.Plugins/scripts/dev/deploy.ps1"
-```
-
 ## 依赖与第三方
 
 发布包（`dist/CYW-Plugins.zip`，与 `dist/release/` 同内容的**单层** zip）**只包含插件本体、第一方 Core 与 0Harmony**——
@@ -62,8 +102,8 @@ powershell -File "CYW.Plugins/scripts/dev/deploy.ps1"
 
 ## 状态
 
-🚧 开发中——**Phase 1（核心层）已完成**：配置系统 / 日志 / Harmony 补丁器 / 模块系统 / 兼容性检查，
-已在真实 SCP:SL 14.2.9 服务器上验证（加载、启用、禁用、损坏配置容错全部通过；单元测试全绿、Core 行覆盖 100%）。
+🚧 开发中——**Phase 1（核心层）已完成**：配置系统 / 日志 / Harmony 补丁器 / 模块系统 / 兼容性检查。
+历史 QA 工件已在真实 SCP:SL 14.2.9 服务器上完成加载、启用、禁用与损坏配置容错演示；VR-011 记录单元测试 45/45、Core 行覆盖 113/113（100%）、分支覆盖 90/92（97.83%），S1–S3 实机证据见 VR-012～VR-014。**这些记录不构成文档变更后最终候选的完整 QA 签署。**
 
 - 计划与任务清单：[`CYW.Plugins/tasks/`](CYW.Plugins/tasks/)
 - 本地测试服手册（重要坑位）：[`CYW.Plugins/docs/dev/test-server.md`](CYW.Plugins/docs/dev/test-server.md)
