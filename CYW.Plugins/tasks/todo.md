@@ -308,3 +308,6 @@
   - 遗留（按设计/后续）：README 配置键表（LabAPI 生成配置无注释）；行尾规范化（.gitattributes）；示例插件与教程（Phase 6 范畴）。
   - 发布候选认证与 G0-G5 终评由 release-manager 轮完成（结论见交付单）。
   - 环境教训补充：shell 扫描器禁双破折号连写、禁全角右括号紧邻 em-dash（规避均经探针实证）。
+- **2026-11-22（v0.1.0 发布闭环）**
+  - ✅ v0.1.0 已正式发布：https://github.com/NewChuyuewei/sl-api/releases/tag/v0.1.0 。认证 `CYW-Plugins.zip` SHA256 保持 `2C69FBD21F17799E10A480947421711BAE1CB10424F5EED3C9A720C3EA426834`（远端 API 与下载文件一致），发布证据归档 VR-020。
+  - 本次发布未重建或修改产品；此后任何产品变更必须建立新候选并重新执行 QA 周期，不得沿用本次候选认证。

@@ -255,3 +255,22 @@
 - **范围排除**：多玩家与玩家进出、性能、ServerQoL 玩法规则、非 Windows 解压、交互式桌面渲染均未验证。此次使用 headless LocalAdmin、0 玩家，未使用可见窗口。
 - **映射**：CMP-003、LOG-005、真实第三方共存、回合重启、最终候选清理与身份保持。
 - **结论**：✅ 在上述范围内通过；零非预期插件异常。
+
+## VR-020 v0.1.0 正式发布（R/G5）— 2026-11-22
+
+- **发布基线**：release commit `3ecfe36332a899ae08aab16ed5bde4c9f9617e62`；发布说明 `releases/v0.1.0.md`。本次发布未重建、未修改产品文件或发布工件。
+- **CI 证据**：Build & Package run #22，run ID `44991469250`，结果 **success**：https://github.com/NewChuyuewei/sl-api/actions/runs/44991469250
+- **标签证据**：annotated tag `v0.1.0`，tag object `9ee15e5e761b90ddf431fd2f448726d9f5114a4d`，目标 commit `3ecfe36332a899ae08aab16ed5bde4c9f9617e62`；已推送至 origin。
+- **GitHub Release**：release ID `454255335`，名称 `CYW's API v0.1.0`，`draft=false`、`prerelease=false`：https://github.com/NewChuyuewei/sl-api/releases/tag/v0.1.0
+- **唯一发布资产**：`CYW-Plugins.zip`，asset ID `778160003`，大小 **390117 bytes**：https://github.com/NewChuyuewei/sl-api/releases/download/v0.1.0/CYW-Plugins.zip
+- **哈希同一性**：远端 API 资产 digest 与下载文件实测 SHA256 均为 `2C69FBD21F17799E10A480947421711BAE1CB10424F5EED3C9A720C3EA426834`；与 VR-018 认证发布 zip 哈希一致。
+- **zip 内容核对**：恰好四项：`README-INSTALL.txt`、`plugins/global/0CywApi.dll`、`dependencies/global/CywApi.Core.dll`、`dependencies/global/0Harmony.dll`。内嵌候选 `0CywApi.dll` SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`；Core `59F3E101B4AFA985EBB9D234B9F24C9D3E3764D7CFD92320E23D02EB6EF92FC3`；Harmony `0DE0118C8F1D4408DE389CA33B46D2FF7778F3A8541B430CAE729EC913D899C7`，均与最终候选身份一致。
+- **独立复核**：Publication RM 裁决 **COMPLETE**。Commander 独立查询 release `454255335`，确认 `draft=false` / `prerelease=false` 与远端 digest；本地标签及下载文件哈希亦相符。
+- **证据位置**：`%TEMP%\opencode\release-v0.1.0`
+  - `07-release.json`：release 创建结果。
+  - `08-asset.json`：资产上传结果。
+  - `09-release-and-assets.json`：release 与资产最终查询。
+  - `10-download-verification.txt`：下载、内容条目与哈希核验。
+  - `11-final-state.txt`：发布后最终状态。
+- **最终状态**：发布时仓库干净，已部署候选不变；无测试插件或测试进程，证据中无凭据。VR-017～VR-019 已登记的范围排除与开放项保持不变，本记录不扩大实机验证范围。
+- **结论**：✅ **v0.1.0 发布完成（publication-complete）**；CI、标签、Release、唯一资产及远端/下载哈希证据链闭合。
