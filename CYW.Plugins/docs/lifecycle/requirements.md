@@ -6,7 +6,7 @@
 > 验证证据编号（VR-xxx）对应 `docs/lifecycle/verification-records.md`。
 > 路径约定：本文档中的路径相对于 `CYW.Plugins/`；以 `../` 开头的指仓库根。
 > 当前发布边界：最终候选 `0CywApi.dll`（SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`）的 QA-A + QA-A2 合并结论为 PASS，QA-B 为 PASS，证据归档为 VR-017～VR-019；Windows 干净服务器仅 zip 安装、S1/S3 生命周期、真实第三方 ServerQoL 共存、LOG-005 与回合重启均已在该候选通过。此为 QA 证据归档，不代表发布或 tag 批准。
-> 仍为 **UNVERIFIED** / 范围排除：多玩家与玩家进出、性能、非 Windows 解压、ServerQoL 玩法规则、交互式桌面渲染；实机验证使用 headless LocalAdmin、0 玩家且无可见窗口。PAT-007/008 离服测试、PAT-009 定向 `UnpatchAll` 审计及 MOD-005 未启用状态 `DisableAll` 定向演示仍按表保持开放。
+> 仍为 **UNVERIFIED** / 范围排除：多玩家与玩家进出、性能、非 Windows 解压、ServerQoL 玩法规则、交互式桌面渲染；实机验证使用 headless LocalAdmin、0 玩家且无可见窗口。
 
 ---
 
@@ -58,9 +58,9 @@
 | CYWS-PAT-005 | 应用/失败/跳过计数在每次应用与汇总时报告 | `CywPatcher` | D | VR-003/VR-005 | ✅ |
 | CYWS-PAT-006 | 同一程序集重复应用为幂等操作（不产生重复补丁），并记录跳过 | `CywPatcher.Apply`（已应用集合守卫） | R | VR-006（F-003 修复）+ VR-009 回归 | ✅ |
 
-| CYWS-PAT-007 | 补丁器状态一致性：程序集仅在类型发现成功后标记为已应用；发现/处理失败时回滚标记（保持可重试）；计数覆盖单次 Apply 调用范围并如实汇总 | `CywPatcher.Apply` | T/R | VR-015（R：修复复核通过）；T 未执行（RV2-17 按设计保留） | 🔧 |
-| CYWS-PAT-008 | 部分加载诊断：`ReflectionTypeLoadException` 时将 LoaderExceptions 数量与首条消息记录为 Warn | `CywPatcher.Apply` | T/R | VR-015（R：修复复核通过）；T 未执行（RV2-17 按设计保留） | 🔧 |
-| CYWS-PAT-009 | 公共契约与审计：`Apply`/`UnpatchAll`/`HarmonyId` 的契约（共享框架 ID、随框架禁用一并撤销、ID 保留语义）在 XML 文档中明示；`UnpatchAll` 成功路径输出 Info 审计行（尽量含受影响方法数） | `CywPatcher.cs` | R/D | VR-015（R：公共契约与生命周期对称复核通过）；D（`UnpatchAll` 审计行）待收集 | 🔧 |
+| CYWS-PAT-007 | 补丁器状态一致性：程序集仅在类型发现成功后标记为已应用；发现/处理失败时回滚标记（保持可重试）；计数覆盖单次 Apply 调用范围并如实汇总 | `CywPatcher.Apply` | T/R | VR-015（R：修复复核通过）、VR-021（D：D-PAT-007 通过，发现失败后可重试且计数正确）；T 未执行（RV2-17 按设计保留） | ✅ |
+| CYWS-PAT-008 | 部分加载诊断：`ReflectionTypeLoadException` 时将 LoaderExceptions 数量与首条消息记录为 Warn | `CywPatcher.Apply` | T/R | VR-015（R：修复复核通过）、VR-021（D：D-PAT-008 通过，LoaderExceptions 数量与首条消息 WARN 已证实）；T 未执行（RV2-17 按设计保留） | ✅ |
+| CYWS-PAT-009 | 公共契约与审计：`Apply`/`UnpatchAll`/`HarmonyId` 的契约（共享框架 ID、随框架禁用一并撤销、ID 保留语义）在 XML 文档中明示；`UnpatchAll` 成功路径输出 Info 审计行（尽量含受影响方法数） | `CywPatcher.cs` | R/D | VR-015（R：公共契约与生命周期对称复核通过）、VR-021（D：D-PAT-009 通过，`UnpatchAll` INFO 审计与自有 ID 隔离） | ✅ |
 
 ### 2.4 模块系统（MOD）
 
@@ -71,7 +71,7 @@
 | CYWS-MOD-003 | 同类型模块重复注册抛出 `InvalidOperationException` | `CywModuleManager.Register` | R | VR-006 | ✅ |
 | CYWS-MOD-004 | 已开始启用（EnableAll 之后）再注册模块必须抛出异常（防止静默不生效） | `CywModuleManager`（运行态守卫） | R | VR-006（F-004 修复）+ VR-009 回归 | ✅ |
 
-| CYWS-MOD-005 | `DisableAll` 在未启用状态下调用：输出警告并保持注册表不变（不清空、不抛出）；禁用路径绝不抛出 | `CywModuleManager` | R/T | VR-014（D：跨启动禁用/恢复回归）、VR-015（R）、VR-017（最终候选 S3 跨启动回归）；未启用状态 `DisableAll` 的定向 T / 注册表不变演示待收集 | 🔧 |
+| CYWS-MOD-005 | `DisableAll` 在未启用状态下调用：输出警告并保持注册表不变（不清空、不抛出）；禁用路径绝不抛出 | `CywModuleManager` | R/T | VR-014（D：跨启动禁用/恢复回归）、VR-015（R）、VR-017（最终候选 S3 跨启动回归）、VR-021（D：D-MOD-005 通过，未启用状态告警、注册表不变且后续生命周期正常） | ✅ |
 
 ### 2.5 兼容性（CMP）
 

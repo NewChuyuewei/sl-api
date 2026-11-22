@@ -274,3 +274,28 @@
   - `11-final-state.txt`：发布后最终状态。
 - **最终状态**：发布时仓库干净，已部署候选不变；无测试插件或测试进程，证据中无凭据。VR-017～VR-019 已登记的范围排除与开放项保持不变，本记录不扩大实机验证范围。
 - **结论**：✅ **v0.1.0 发布完成（publication-complete）**；CI、标签、Release、唯一资产及远端/下载哈希证据链闭合。
+
+## VR-021 定向验证：MOD-005 / PAT-007 / PAT-008 / PAT-009（D）— 2026-11-22
+
+- **冻结候选**：已发布候选 `0CywApi.dll` SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`，验证前后保持不变；未重建任何 CYW 源码或二进制，未修改产品或发布工件。
+- **环境**：SCP:SL **14.2.9**、LabAPI **1.1.7**、Harmony **2.2.2**；headless LocalAdmin、**0 玩家**。
+- **场景结果**（行号均指 `10-final-server-stdout-gb2312.log`）：
+
+  | 场景 | 需求 | 实测结果 | 日志行 | 结论 |
+  |---|---|---|---|---|
+  | D-MOD-005 | CYWS-MOD-005 | 使用全新隔离模块管理器；未启用状态 `DisableAll` 的警告已捕获，无异常，注册表保持 **1**；随后 enable/disable 生命周期完整完成 | 232 | ✅ PASS |
+  | D-PAT-007 | CYWS-PAT-007 | 首次类型发现抛出 `InvalidOperationException`；程序集保持未标记且计数为零。重试应用 **1** 个补丁，目标计数变为 **2**；第三次调用无操作，发现计数为 **2** | 233–240 | ✅ PASS |
+  | D-PAT-008 | CYWS-PAT-008 | 真实 missing-base 依赖触发 WARN，包含 `1 loader exception(s)` 与首条异常消息；可用补丁成功应用，目标计数变为 **4** | 241–246 | ✅ PASS |
+  | D-PAT-009 | CYWS-PAT-009 | 数值序列 **`0 → 10 → 11 → 10 → 0`**；INFO 审计准确报告 **1** 个受影响方法；外部 owner 的补丁在 CYW 撤销后存活；最终 QA 注册计数为 **0** | 247–251 | ✅ PASS |
+
+- **外部测试工程与汇总**：三个外部 harness 项目均构建 **0 警告 / 0 错误**；定向场景汇总 **`passed=4 failed=0`**。这些工程仅用于验证，不构成 CYW 产品重建。
+- **清理证明**：LabAPI 备份已恢复；plugins / dependencies / configs 清单差异均为 **0**；仅保留原候选依赖；无 QA 工件或 QA 进程残留；仓库干净；无 release 或 tag 变更。
+- **证据位置**：`%TEMP%\opencode\qa-directed-mod-pat`
+  - `QA-directed-report.md`：完整定向验证报告。
+  - `10-final-server-stdout-gb2312.log`：最终服务器输出及上述行号证据。
+  - `11-cleanup-final.log`：清理结果。
+  - `13-post-report-state.txt`：报告后的最终状态。
+- **UNVERIFIED（Mono 归因）**：自定义 PAT-007 Assembly wrapper 附近出现一次非致命 Mono `gpath.c:115: assertion 'filename != NULL' failed`。其来源与根因未确定；该输出未阻止重试、未引发托管异常，也未影响任何场景断言。**不将其认定为 CYW 缺陷，也不视为已解释。**
+- **范围边界**：可选非法标量配置强制转换未运行；本任务未执行无关重建或玩家场景。本记录仅关闭上述四项定向验证缺口，不扩大其他验证范围。
+- **映射**：CYWS-MOD-005、CYWS-PAT-007、CYWS-PAT-008、CYWS-PAT-009。
+- **结论**：✅ 四项定向实机演示全部通过，对应定向验证债务关闭；冻结候选与发布状态不变。

@@ -311,3 +311,6 @@
 - **2026-11-22（v0.1.0 发布闭环）**
   - ✅ v0.1.0 已正式发布：https://github.com/NewChuyuewei/sl-api/releases/tag/v0.1.0 。认证 `CYW-Plugins.zip` SHA256 保持 `2C69FBD21F17799E10A480947421711BAE1CB10424F5EED3C9A720C3EA426834`（远端 API 与下载文件一致），发布证据归档 VR-020。
   - 本次发布未重建或修改产品；此后任何产品变更必须建立新候选并重新执行 QA 周期，不得沿用本次候选认证。
+- **2026-11-22（MOD/PAT 定向验证债务关闭）**
+  - ✅ D-MOD-005、D-PAT-007、D-PAT-008、D-PAT-009 全部通过，证据归档 VR-021；CYWS-MOD-005、CYWS-PAT-007、CYWS-PAT-008、CYWS-PAT-009 对应需求行已关闭。冻结发布候选哈希不变，未修改产品或发布工件。
+  - `CYW.Printer` 的 PRN-S1/S2 仍为独立门禁；本记录不表示 Printer 已实现，也不构成编码批准。
