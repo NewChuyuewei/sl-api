@@ -13,7 +13,7 @@
 
 ### 安装
 
-> **干净服务器安装验收：UNVERIFIED。** 下列目录布局已在开发测试服使用，但尚未完成“干净服务器上仅使用发布 zip”的完整安装验收；这不构成最终发布候选的 QA 签署。
+> **干净服务器安装验收：verified-on-clean-server（Windows，QA-A2 / VR-018）。** 已在备份并清空目标目录后，仅使用 `[System.IO.Compression.ZipFile]::ExtractToDirectory($zip, $labRoot)` 将发布 zip 解压到 LabAPI 根目录并完成启动验证；未使用 `deploy.ps1`，也未从 `bin` 复制文件。该结果属于最终候选 QA 证据，不代表发布或 tag 批准。
 
 1. 将 `CYW-Plugins.zip` 解压到 LabAPI 目录（`%APPDATA%\SCP Secret Laboratory\LabAPI\`，或含 `LabAPI` 的服务端根）。zip 内部即 LabAPI 布局，无需再嵌套一层目录。
 2. 确认以下文件就位；第三方组件及版本见[依赖与第三方](#依赖与第三方)：
@@ -103,7 +103,9 @@ pwsh "CYW.Plugins/packaging.ps1"      # 构建 + 打包 → CYW.Plugins/dist/CYW
 ## 状态
 
 🚧 开发中——**Phase 1（核心层）已完成**：配置系统 / 日志 / Harmony 补丁器 / 模块系统 / 兼容性检查。
-历史 QA 工件已在真实 SCP:SL 14.2.9 服务器上完成加载、启用、禁用与损坏配置容错演示；VR-011 记录单元测试 45/45、Core 行覆盖 113/113（100%）、分支覆盖 90/92（97.83%），S1–S3 实机证据见 VR-012～VR-014。**这些记录不构成文档变更后最终候选的完整 QA 签署。**
+最终候选（HEAD `8522c39bae624b3b413740f4a6e7afe7c9a7249a`；`0CywApi.dll` SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`）的 QA-A + QA-A2 合并结论为 PASS，QA-B 为 PASS，证据归档为 VR-017～VR-019：构建 0 警告/0 错误、单元测试 45/45、Core 行覆盖 113/113（100%）与分支覆盖 90/92（97.83%）；S1/S3 生命周期、Windows 仅 zip 干净安装、真实第三方 ServerQoL 共存、LOG-005 与回合重启均通过，零非预期插件异常。这些是最终候选 QA 证据，**不代表发布、tag 或发布批准**。
+
+验证范围仍有明确排除：多玩家与玩家进出、性能、ServerQoL 玩法规则、非 Windows 解压及交互式桌面渲染均为 **UNVERIFIED**；实机验证使用 headless LocalAdmin、0 玩家且无可见窗口。历史实机与单元测试证据仍见 VR-011～VR-014。
 
 - 计划与任务清单：[`CYW.Plugins/tasks/`](CYW.Plugins/tasks/)
 - 本地测试服手册（重要坑位）：[`CYW.Plugins/docs/dev/test-server.md`](CYW.Plugins/docs/dev/test-server.md)

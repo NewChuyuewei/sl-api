@@ -1,6 +1,6 @@
 # 验证记录（Verification Records）
 
-> 文档编号：**CYWS-VR-001** ｜ 更新：2026-11-15
+> 文档编号：**CYWS-VR-001** ｜ 更新：2026-11-22
 > 格式说明：每条记录含 **ID / 方法 / 环境 / 命令或步骤 / 结果 / 证据摘录 / 结论**。
 > 方法图例：T 单测 ｜ D 实机演示 ｜ R 审查 ｜ A 分析。需求映射见 `requirements.md`。
 
@@ -213,3 +213,45 @@
 - **工件哈希基线澄清**：构建为同 HEAD 确定性（受控实验：同一 HEAD 下 csproj 注释变更前后字节恒等 `47144720...`）；哈希随提交变化系因 SDK 将 HEAD SHA 嵌入 `AssemblyInformationalVersion`。三个证据工件 `D7D621A1...`（HEAD `77d4d52`）/ `8C744868...`（HEAD `045777c`）/ `47144720A47D2824C153EAB235D88EA602ED1861EF8270B2CEFCB3B4D13792C3`（HEAD `5adb18a`）之间**零 .cs 变化**（git diff --name-status 逐段核实）→ 行为等价；发布候选将在 RM 阶段以最终 HEAD 重新构建并实机冒烟认证。
 - **映射**：RV2 UNVERIFIED#1（闭合）、QA/CI 哈希一致性方法论
 - **结论**：✅ 记录归档
+
+## VR-017 最终候选 QA-A：保留证据、构建/覆盖率与 S1/S3（T/D/R）— 2026-11-22
+
+- **候选基线**：HEAD / source baseline `8522c39bae624b3b413740f4a6e7afe7c9a7249a`。
+- **最终候选 SHA256**：
+  - `0CywApi.dll`：`71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`
+  - `CywApi.Core.dll`：`59F3E101B4AFA985EBB9D234B9F24C9D3E3764D7CFD92320E23D02EB6EF92FC3`
+  - `0Harmony.dll`：`0DE0118C8F1D4408DE389CA33B46D2FF7778F3A8541B430CAE729EC913D899C7`
+- **保留证据复核**：Release 构建 **0 警告 / 0 错误**；单元测试 **45/45 通过**；Core 行覆盖 **113/113（100%）**、分支覆盖 **90/92（97.83%）**。`bin` / `release` / zip / 已部署载荷身份完全一致。
+- **实机场景**：S1 启动/启用与 S3 禁用/恢复均通过，零非预期插件异常。S3 仅是跨启动禁用/恢复回归，不替代 MOD-005 未启用状态 `DisableAll` 的定向演示。
+- **证据位置**：`%TEMP%\opencode\qa-a-8522c39`；后续干净安装补证见 `%TEMP%\opencode\qa-a2-8522c39`（VR-018）。
+- **评审结论说明**：QA-A 保留证据评审原判 **PARTIAL**，唯一缺口是原始干净安装 transcript 缺失；该缺口已由 QA-A2 的 `00-clean-install-transcript.log` 闭合。QA-A + QA-A2 合并结论为 **PASS**。
+- **映射**：BLD-001/004、HLR-007、CMP-003（S1）、HLR-001、MOD-005（仅 S3 回归，定向缺口保持开放）、最终候选身份核验。
+- **结论**：✅ 保留证据范围内通过；与 VR-018 合并后 QA-A 干净安装证据链完整。
+
+## VR-018 最终候选 QA-A2：Windows 干净服务器仅 zip 安装（D）— 2026-11-22
+
+- **候选**：`0CywApi.dll` SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`；发布 zip SHA256 `2C69FBD21F17799E10A480947421711BAE1CB10424F5EED3C9A720C3EA426834`。
+- **方法**：备份并清空目标目录后，仅执行 `[System.IO.Compression.ZipFile]::ExtractToDirectory($zip, $labRoot)` 将 `CYW-Plugins.zip` 解压到 LabAPI 根目录；未使用 `deploy.ps1`，未从 `bin` 复制文件。随后启动服务器验证安装。
+- **结果**：Windows 干净服务器仅 zip 安装与启动验证通过，零非预期插件异常；与 VR-017 合并关闭 QA-A 的原始 transcript 缺口。
+- **证据位置**：`%TEMP%\opencode\qa-a2-8522c39`
+  - `00-clean-install-transcript.log`：干净安装完整 transcript。
+  - `01-extracted-files-and-hashes.txt`：解压文件与哈希。
+  - `02-s1-stdout-gb2312.log`：S1 启动输出。
+  - `03-verification-summary.txt`：验证摘要。
+- **边界**：本记录仅证明 Windows 解压与干净安装；非 Windows 解压仍为 **UNVERIFIED**。
+- **映射**：HLR-008、Windows 仅 zip 干净安装发布边界、QA-A 证据缺口闭合。
+- **结论**：✅ 通过（verified-on-clean-server，Windows）。
+
+## VR-019 最终候选 QA-B：第三方共存、LOG-005 与回合重启（D）— 2026-11-22
+
+- **候选**：`0CywApi.dll` SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`。
+- **共存对象**：真实第三方 ServerQoL `1.0.0.0`，SHA256 `BA466B2ACDCD6EA883493745C6BF2817AA8355EE7F4BB7800200AE25F5E740A7`；仅引用 LabAPI 1.1.7，无 EXILED / Harmony 依赖。外部测试专用 CywQaProbe SHA256 `9DF595250DA1A5BE1FA10627C89A29C03BC5C309A7F9C19839150457BAAB1C96`，仅用于验证，**从未随发布包分发**。
+- **场景结果**：QAB-BOOT-01、QAB-CMP003-01、QAB-COEX-01、QAB-LOG005-01、QAB-ROUND-01、QAB-CLEAN-01 全部 **PASS**。
+- **LOG-005 原始载荷计数**：ESC=0、CR=0、BEL=0、C1=0；LF 保留。GB2312 控制台显示 `?` 替换及字面 `\u009B`，与既有控制台降级归因一致。
+- **回合重启**：恰好一次 round-restart 请求与一次 `RoundRestarted` 观察；第二次 `WaitingForPlayers` 未产生新请求，ServerQoL 保持启用。
+- **清理证明**：最终恢复为仅 CYW 的部署与配置；最终候选哈希不变；无测试插件、测试进程或测试标记残留；QA-B 清理时仓库干净。
+- **证据位置**：`%TEMP%\opencode\qa-b-8522c39`
+  - `QA-B-report.md`、`03-la-test-stdout.log`、`04-log-analysis.txt`、`05-probe-byte-proof.txt`、`06-cleanup-final.txt`。
+- **范围排除**：多玩家与玩家进出、性能、ServerQoL 玩法规则、非 Windows 解压、交互式桌面渲染均未验证。此次使用 headless LocalAdmin、0 玩家，未使用可见窗口。
+- **映射**：CMP-003、LOG-005、真实第三方共存、回合重启、最终候选清理与身份保持。
+- **结论**：✅ 在上述范围内通过；零非预期插件异常。

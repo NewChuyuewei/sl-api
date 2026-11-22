@@ -5,7 +5,8 @@
 > 验证方法图例：**T** = 离服单元测试 ｜ **D** = 实机演示（目标环境验证） ｜ **R** = 审查 ｜ **A** = 分析
 > 验证证据编号（VR-xxx）对应 `docs/lifecycle/verification-records.md`。
 > 路径约定：本文档中的路径相对于 `CYW.Plugins/`；以 `../` 开头的指仓库根。
-> 当前发布边界：VR-011～VR-014 对应历史 QA 工件；文档变更后的最终候选完整 QA、生命周期/插件共存，以及干净服务器仅 zip 安装均为 **UNVERIFIED**。本表中的历史 ✅ 不得替代上述发布验收。
+> 当前发布边界：最终候选 `0CywApi.dll`（SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`）的 QA-A + QA-A2 合并结论为 PASS，QA-B 为 PASS，证据归档为 VR-017～VR-019；Windows 干净服务器仅 zip 安装、S1/S3 生命周期、真实第三方 ServerQoL 共存、LOG-005 与回合重启均已在该候选通过。此为 QA 证据归档，不代表发布或 tag 批准。
+> 仍为 **UNVERIFIED** / 范围排除：多玩家与玩家进出、性能、非 Windows 解压、ServerQoL 玩法规则、交互式桌面渲染；实机验证使用 headless LocalAdmin、0 玩家且无可见窗口。PAT-007/008 离服测试、PAT-009 定向 `UnpatchAll` 审计及 MOD-005 未启用状态 `DisableAll` 定向演示仍按表保持开放。
 
 ---
 
@@ -44,7 +45,7 @@
 | CYWS-LOG-003 | 可选的来源程序集名前缀（排除框架自身程序集） | `CYW.API/src/CywApi/CywLog.cs` | R | VR-006 | ✅ |
 | CYWS-LOG-004 | 颜色解析器对 null/空输入返回原值（不抛出） | `AnsiColorParser`（参数宣告为可空） | T | VR-002（26 用例，含 3 项空值用例） | ✅ |
 
-| CYWS-LOG-005 | 输出净化（choke-point）：`CywLog.Format` 在颜色处理前将原始控制字符（C0/C1；换行 `\n` 除外）替换为可见表示，使不可信字符串无法注入终端控制序列或伪造日志行；另提供 `EscapeData(string)` 将一切控制字符（含 `\n`/`\r`）转为可见表示，供数据字段使用 | `CywLog.cs` + Core `ControlCharFilter`（新增）+ 单测 | T/D | VR-011（T：45/45，含 `ControlCharFilterTests`）、VR-013（D：活体探针） | ✅ |
+| CYWS-LOG-005 | 输出净化（choke-point）：`CywLog.Format` 在颜色处理前将原始控制字符（C0/C1；换行 `\n` 除外）替换为可见表示，使不可信字符串无法注入终端控制序列或伪造日志行；另提供 `EscapeData(string)` 将一切控制字符（含 `\n`/`\r`）转为可见表示，供数据字段使用 | `CywLog.cs` + Core `ControlCharFilter`（新增）+ 单测 | T/D | VR-011（T：45/45，含 `ControlCharFilterTests`）、VR-013（D：活体探针）、VR-019（最终候选 QAB-LOG005-01） | ✅ |
 
 ### 2.3 补丁系统（PAT）
 
@@ -70,7 +71,7 @@
 | CYWS-MOD-003 | 同类型模块重复注册抛出 `InvalidOperationException` | `CywModuleManager.Register` | R | VR-006 | ✅ |
 | CYWS-MOD-004 | 已开始启用（EnableAll 之后）再注册模块必须抛出异常（防止静默不生效） | `CywModuleManager`（运行态守卫） | R | VR-006（F-004 修复）+ VR-009 回归 | ✅ |
 
-| CYWS-MOD-005 | `DisableAll` 在未启用状态下调用：输出警告并保持注册表不变（不清空、不抛出）；禁用路径绝不抛出 | `CywModuleManager` | R/T | VR-014（D：跨启动禁用/恢复回归）、VR-015（R）；未启用状态 `DisableAll` 的定向 T / 注册表不变演示待收集 | 🔧 |
+| CYWS-MOD-005 | `DisableAll` 在未启用状态下调用：输出警告并保持注册表不变（不清空、不抛出）；禁用路径绝不抛出 | `CywModuleManager` | R/T | VR-014（D：跨启动禁用/恢复回归）、VR-015（R）、VR-017（最终候选 S3 跨启动回归）；未启用状态 `DisableAll` 的定向 T / 注册表不变演示待收集 | 🔧 |
 
 ### 2.5 兼容性（CMP）
 
@@ -78,7 +79,7 @@
 |---|---|---|---|---|---|
 | CYWS-CMP-001 | 从 `GameCore.Version` 的 Major/Minor/Revision 构造运行版本 | `CYW.API/src/CywApi/Modules/CompatibilityModule.cs` | D | VR-003（读出 14.2.9） | ✅ |
 | CYWS-CMP-002 | 版本低于最小支持版本（14.2.0）时输出醒目警告且不崩溃、不阻断启用 | `VersionRange`（Core）+ `CompatibilityModule` | D/T | VR-005（99.0.0 越界警告）、VR-002（VersionRange 5 用例） | ✅ |
-| CYWS-CMP-003 | BuildInfo 注入为幂等（重复启用不重复追加），且注入行在**最终** `buildinfo` 输出中可见（须在 LabAPI `AddPluginsToBuildInfo` 覆盖之后写入；经 `ServerEvents.PluginsEnabled` 或等价后置时机） | `CompatibilityModule`（后置注入） | D | VR-012（S1：后置重注入双标记，最终 Mod Description 含框架版本行，零异常） | ✅ |
+| CYWS-CMP-003 | BuildInfo 注入为幂等（重复启用不重复追加），且注入行在**最终** `buildinfo` 输出中可见（须在 LabAPI `AddPluginsToBuildInfo` 覆盖之后写入；经 `ServerEvents.PluginsEnabled` 或等价后置时机） | `CompatibilityModule`（后置注入） | D | VR-012（S1：后置重注入双标记，最终 Mod Description 含框架版本行，零异常）、VR-017（最终候选 S1）、VR-019（QAB-CMP003-01） | ✅ |
 
 | CYWS-CMP-004 | 服务器透明性声明门禁：`IsTransparent` 在零侵入性补丁阶段保持 `true`；任何侵入性补丁（M2 D4 玩家替换等）落地前必须复评并预期切换为 `false` | `CywPlugin.cs` | R/D | 用户裁决 2026-11-14（RV2-01） | ⏳ M2 门禁 |
 
@@ -86,10 +87,10 @@
 
 | ID | 低层需求 | 实现 | 验证方法 | 验证证据 | 状态 |
 |---|---|---|---|---|---|
-| CYWS-BLD-001 | Release 构建零警告零错误（全解决方案，net48） | `../CywApi.slnx` + 三个项目 | T | VR-001 | ✅ |
+| CYWS-BLD-001 | Release 构建零警告零错误（全解决方案，net48） | `../CywApi.slnx` + 三个项目 | T | VR-001、VR-017（最终候选 0/0） | ✅ |
 | CYWS-BLD-002 | 构建期 publicize 流水线：引用原始游戏 DLL，产出可直接加载的插件（不携带游戏程序集） | `CYW.API/src/CywApi/CywApi.csproj`（BepInEx.AssemblyPublicizer） | D | VR-003（服务器实际加载） | ✅ |
 | CYWS-BLD-003 | 部署脚本将产物放置到 `plugins\global` + `dependencies\global` | `scripts/dev/deploy.ps1` | D | VR-003/VR-004 | ✅ |
-| CYWS-BLD-004 | Core 单元测试可离服运行（`dotnet test`），并产生覆盖率测量 | `tests/CywApi.Tests` + coverlet | T | VR-002/VR-008 | ✅ |
+| CYWS-BLD-004 | Core 单元测试可离服运行（`dotnet test`），并产生覆盖率测量 | `tests/CywApi.Tests` + coverlet | T | VR-002/VR-008、VR-017（最终候选 45/45；行 113/113；分支 90/92） | ✅ |
 
 | CYWS-BLD-005 | 语言版本单点钉住：全解决方案 `LangVersion` 由 `Directory.Build.props`（14.0）唯一定义；项目不得覆盖 | `Directory.Build.props` + `*.csproj` | R/T | VR-015（R：修复复核通过）、VR-011（T：Release 0 警告/0 错误，45/45） | ✅ |
 | CYWS-BLD-006 | publicize 面最小化：每个 `Publicize="true"` 引用在 csproj 注明理由；`LabApi` 引用默认不 publicize（确需内部成员时逐项注明） | `CywApi.csproj` | R | VR-015（R：修复复核通过） | ✅ |
