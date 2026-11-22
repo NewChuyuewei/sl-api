@@ -5,9 +5,9 @@
 
 技术基线：**LabAPI 1.1.7** · **SCP:SL 14.2.9** · 插件版本 `0.1.0`。
 
-## [Unreleased]
+## [0.1.0] - 2026-11-22
 
-> 最终候选（`0CywApi.dll` SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`）的 QA-A + QA-A2 合并结论为 PASS，QA-B 为 PASS（VR-017～VR-019）：Windows 仅 zip 干净安装、S1/S3 生命周期、真实第三方共存、LOG-005 与回合重启证据均已归档。本记录不代表已发布、打 tag 或获得发布批准。
+> 本版本（`0CywApi.dll` SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`）的 QA-A + QA-A2 合并结论为 PASS，QA-B 为 PASS（VR-017～VR-019）：Windows 仅 zip 干净安装、S1/S3 生命周期、真实第三方共存、LOG-005 与回合重启证据均已归档，发布候选已获批准。
 
 **⚠ Owner action**：本轮无配置键 / 权限节点 / 内容 ID 变更；README 新增「依赖与第三方」、完整配置键表与当前构建透明性说明——手工部署（直接拷贝 DLL）的服务器请对照依赖表核对 `0CywApi.dll`、`CywApi.Core.dll`、`0Harmony.dll` 均已就位。
 
