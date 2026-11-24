@@ -1,6 +1,6 @@
 # 验证记录（Verification Records）
 
-> 文档编号：**CYWS-VR-001** ｜ 更新：2026-11-22
+> 文档编号：**CYWS-VR-001** ｜ 更新：2026-11-23
 > 格式说明：每条记录含 **ID / 方法 / 环境 / 命令或步骤 / 结果 / 证据摘录 / 结论**。
 > 方法图例：T 单测 ｜ D 实机演示 ｜ R 审查 ｜ A 分析。需求映射见 `requirements.md`。
 
@@ -299,3 +299,55 @@
 - **范围边界**：可选非法标量配置强制转换未运行；本任务未执行无关重建或玩家场景。本记录仅关闭上述四项定向验证缺口，不扩大其他验证范围。
 - **映射**：CYWS-MOD-005、CYWS-PAT-007、CYWS-PAT-008、CYWS-PAT-009。
 - **结论**：✅ 四项定向实机演示全部通过，对应定向验证债务关闭；冻结候选与发布状态不变。
+
+## VR-022 PRN-S2：LocalAdmin stdout/stderr 拓扑实测（D）— 2026-11-23
+
+- **冻结候选与探针**：候选 `0CywApi.dll` SHA256 `71CEA7AE72322DCA1099DA6FEA7698AA79C84C65EBF9EBFF132BE9D50AC22A8E`，验证前后保持不变；探针 `PrnS2Probe.dll` SHA256 `6DAC0038AAB882D0520D623B8669064A114BB6BFDC0E9BC421D5F183BC6DFC7E`。探针构建 **0 警告 / 0 错误**；源码扫描未发现 Console writer 或 encoding 变更（`Console.SetOut`、`SetError`、`OutputEncoding`、`InputEncoding`）。
+- **环境**：SCP:SL **14.2.9**、LabAPI **1.1.7**、LocalAdmin **2.5.16**；headless 端口 `7777`、**0 玩家**。两次主运行的有效配置均含 `la_show_stdout_and_stderr: false`、`la_log_stdout_and_stderr: true`。
+- **启动模式与结果**：
+
+  | 模式 | 实际参数 | 实测结果 |
+  |---|---|---|
+  | 可见 | `7777 --acceptEULA --useDefault --printStd` | 每个 direct 与 structured marker 均在外层输出中捕获。 |
+  | 隐藏 | `7777 --acceptEULA --useDefault` | 所有 direct marker 均不见于外层 stdout/stderr；structured marker 仍可见；LocalAdmin 内部日志保留每个 direct marker。 |
+
+- **输出拓扑事实**：
+  - **多行**：每个源文本行分别获得时间戳与 `[STDOUT]` 前缀；不存在 continuation-block 格式。
+  - **Flush**：部分写入后调用 `Console.Out.Flush()` 未产生独立行；该文本与后续 `WriteLine` 拼接后才出现。后续的换行结尾输出无需显式 flush 即可出现。
+  - **stderr**：三个 `Console.Error` marker 全部转为 `[STDOUT]`；`[STDERR]` 标签为 **0**，外层 stderr 为空。输出被合并且未重复，但未保留为独立 stderr 通道。
+  - **ANSI**：direct 原始 `ESC[31m` 与 `ESC[0m` 字节保留；普通 structured Logger 对照行没有 ESC 字节。这不证明交互式颜色保真。
+  - **Unicode**：外层捕获保留中文、带重音的 `é` 与 emoji 的 UTF-8 字节；LocalAdmin 内部日志同一行出现 mojibake。仅证明两层结果不同，**未建立通用 Unicode 保真结论**。
+  - **顺序**：direct 行先于更早发出的 structured Logger 行被转发；两类输出各自相对顺序保留，但跨通道发出顺序未保留，本运行结果不构成调度保证。
+- **裁决**：**CONDITIONAL**。未来 `LabApiConsoleSink` 仅在操作者通过 `--printStd` 或 `la_show_stdout_and_stderr: true` 启用 LocalAdmin 子进程实时输出显示时，才可作为**显式 opt-in、best-effort 的展示 sink**。正常 LabAPI structured `Logger` 路径必须保持权威日志路径与 fallback；无条件 direct-console 实时展示为 **NO-GO**。
+- **编码者约束**：
+  1. 必须取得两项确认：Printer/展示功能 opt-in，以及 LocalAdmin 实时输出 opt-in（`--printStd` 或 `la_show_stdout_and_stderr: true`）。缺少任一确认时，保持 sink 禁用或明确告警并使用 structured Logger fallback；写入无异常不等于实时可见。
+  2. `la_log_stdout_and_stderr` 仅控制文件日志，不启用实时可见性，不能替代实时显示 opt-in。
+  3. 仅写入完整、换行结尾的记录。
+  4. 有界 MEC drain 与 grace interval 不能确认 LocalAdmin 已显示，也不能保证相对 structured 日志的顺序；不得在主线程阻塞等待确认。
+  5. 不得依赖 `Console.Error` 作为独立通道；必须保留编码不确定性告警，且不得声称交互式 SGR/颜色保真。
+- **证据位置**：`%TEMP%\opencode\prn-s2`
+  - `PRN-S2-report.md`：完整实测报告与裁决。
+  - `06-byte-log-analysis.txt`：marker 计数、原始字节、编码与顺序分析。
+  - `07-cleanup-final.log`：部署、配置、进程与仓库清理结果。
+- **清理证明**：恢复为仅候选部署及原 LocalAdmin 配置；plugin/dependency/config manifest 差异均为 **0**；QA 工件在证据保存后移除；无 SCPSL/LocalAdmin 进程；仓库干净；未修改产品、发布工件或实现 Printer。
+- **UNVERIFIED**：交互式终端渲染与实际字形显示；各运行层精确的 encoding 设置及 Unicode 分歧机制；隐藏模式且 `la_log_stdout_and_stderr: false` 的组合；能够产生真实 `[STDERR]` 记录的条件。
+- **映射**：PRN-S2；本记录只归档 stdout/stderr 拓扑实测与后续编码约束，不表示 Printer 已实现或批准编码。
+- **结论**：⚠ **CONDITIONAL**；可见输出前置条件与隐藏、stderr、编码、顺序边界已实测，无条件实时 direct sink 不获通过。
+
+## VR-023 PRN-S1：ServerConsole IL 核验否决全局接管（R）— 2026-11-23
+
+- **证据基线**：实际 DLL SHA256 `E098A8DDA09D6CE12C5D145B8CDFC6B50C4163463FED8E12100EA0512897D6C2`；ILSpy 证据根目录 `%TEMP%\opencode\prn-s1`。
+- **精确签名**：`public static void AddLog(string q, ConsoleColor color = ConsoleColor.Gray, bool hideFromOutputs = false)`（`ServerConsole.il:3111-3136`）；`private static void PrintOnOutputs(string text, ConsoleColor color)`（`ServerConsole.il:4748-4756`）。
+- **AddLog 调用顺序**：`IL_0000..0002` 首先调用 `PrintFormattedString`；随后仅在 `hideFromOutputs=false` 时由 `IL_000a..000c` 调用 `PrintOnOutputs`；`IL_0011` 返回（`ServerConsole.il:3125-3135`）。
+- **正常输出路径**：`PrintFormattedString` 在 `PrintOnOutputs` 之前，将格式化记录经 `ServerStatic.ServerOutput` 送往 TCP、StandardOutput、NonDedicatedOutput 与 FileConsole。`TcpConsole.AddLog` 将 `TextOutputEntry` 入队并由自己的后台线程发送；FileConsole 写入其 mapi 路由；control entries 使用 `AddOutputEntry`，不依赖 `PrintOnOutputs`。
+- **IOutput 路径**：`PrintOnOutputs` 另行枚举已注册的 `IOutput` listener，清理不可用 listener，并通过 `MainThreadDispatcher.Update` 调度其 `Print` 回调。跳过它**并不能**替代正常 console/TCP 展示，反而会抑制 listener 通知、清理与异常报告。
+- **线程本地来源边界**：thread-local provenance 仅在同步 `PrintOnOutputs` prefix 可见，在已调度的 `IOutput` 回调内不能可靠获得。`NorthwoodLib.ActionDispatcher` 的 inline 细节仍为 **UNVERIFIED**，但不改变本次否决裁决。
+- **最终评审裁决**：**NO-GO**。所检查目标中，没有任何一个既能接管正常管理展示，又能保留 TCP、LocalAdmin 日志、文件、control、RA 与无关 listener；全局 `AddLog` 替换同样没有依据。**不批准任何 Printer 实现。**
+- **后续路线裁决**：用户随后选择有界的 **仅 CYW 自有输出** 路线；全局拦截方案放弃。未修改任何产品文件或 v0.1.0 发布工件。
+- **证据位置**：`%TEMP%\opencode\prn-s1`
+  - `ServerConsole.il`：AddLog、AddOutputEntry、PrintFormattedString 与 PrintOnOutputs 核验。
+  - `ServerOutput.TcpConsole.il`、`ServerOutput.StandardOutput.il`、`ServerOutput.NonDedicatedOutput.il`、`ServerOutput.FileConsole.il`：正常输出与后台/文件路径核验。
+  - `IOutput.il`、`MainThreadDispatcher.il`：listener 与主线程调度边界核验。
+- **UNVERIFIED**：`NorthwoodLib.ActionDispatcher` 是否在特定条件下 inline 执行；该未决项不影响 NO-GO，因为正常输出分叉及 listener 调度边界已由上述 IL 证实。
+- **映射**：PRN-S1；本记录仅归档 IL 评审及路线收窄，不表示 Printer 已实现、已登记需求或批准编码。
+- **结论**：⛔ **NO-GO（全局接管/全局 AddLog 替换）**；后续仅允许沿 CYW 自有输出的有界路线继续需求与设计工作。

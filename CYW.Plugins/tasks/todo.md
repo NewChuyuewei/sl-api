@@ -314,3 +314,7 @@
 - **2026-11-22（MOD/PAT 定向验证债务关闭）**
   - ✅ D-MOD-005、D-PAT-007、D-PAT-008、D-PAT-009 全部通过，证据归档 VR-021；CYWS-MOD-005、CYWS-PAT-007、CYWS-PAT-008、CYWS-PAT-009 对应需求行已关闭。冻结发布候选哈希不变，未修改产品或发布工件。
   - `CYW.Printer` 的 PRN-S1/S2 仍为独立门禁；本记录不表示 Printer 已实现，也不构成编码批准。
+- **2026-11-23（PRN-S2 stdout 拓扑实测）**
+  - PRN-S2 裁决 **CONDITIONAL**，可见输出前置条件及隐藏模式、stderr 合并、Unicode 与跨通道顺序边界已实测并归档 VR-022。全局 `CYW.Printer` 编码仍须等待 PRN-S1 完成及需求登记；本记录不表示 Printer 已实现或批准编码。
+- **2026-11-23（PRN-S1 ServerConsole IL 核验）**
+  - PRN-S1 裁决 **NO-GO**：所检查目标均无法同时接管正常管理展示并保留 TCP、LocalAdmin 日志、文件、control、RA 与无关 listener；全局 `AddLog` 替换亦无依据，证据归档 VR-023。用户随后将路线收窄为**仅 CYW 自有输出**并放弃全局拦截；Printer 仍未实现，需求登记与编码批准尚未完成。
