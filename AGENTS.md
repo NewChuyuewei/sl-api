@@ -162,6 +162,31 @@
 | 打包/部署/移植           | `scpsl-migration-release`                            | `scpsl-release-manager`  |
 | 多专家协调               | `scpsl-agent-orchestration` + `scpsl-plugin-dev`     | `scpsl-commander`        |
 
+### B3.1 Spec Kit 命令自动调度（自 2026-11-28 初始化起）
+
+当前仓库已完成 Spec Kit + OpenCode 初始化。共享基础设施位于 `.specify/`，命令定义位于 `.opencode/commands/speckit.*.md`。AI 在任务符合下表触发条件时，**应主动调用对应流程，无需用户再次输入斜杠命令或另行提醒**；执行前先读取对应命令文件并遵守其中的检查、hook 与输出要求。宿主支持斜杠命令时可直接调用；不支持时必须按命令文件完成等价步骤，不得以此为由停摆。
+
+| 触发条件 | 主动调用的命令 | 目的 |
+| --- | --- | --- |
+| 首次建立或明确修订项目原则 | `/speckit.constitution` | 建立/更新 constitution，结果须交用户复核 |
+| 新功能、新行为或现有规格缺失 | `/speckit.specify` | 形成用户场景与可验收规格 |
+| 规格存在影响架构、安全或行为的实质歧义 | `/speckit.clarify` | 在计划前消除关键歧义 |
+| 规格已明确，需要技术路线与实施计划 | `/speckit.plan` | 形成架构、文件边界和验证计划 |
+| 计划后需检查需求完整性与质量覆盖 | `/speckit.checklist` | 生成质量检查清单（按需） |
+| 计划已明确，需要原子任务分解 | `/speckit.tasks` | 生成有序、可执行任务 |
+| 任务完成后、实现前需一致性核对 | `/speckit.analyze` | 检查 spec/plan/tasks 与代码的覆盖和冲突 |
+| 需求已登记、计划已获批准且实现条件满足 | `/speckit.implement` | 按任务执行实现与验证 |
+| 实现后需核对剩余工作并收敛 | `/speckit.converge` | 评估代码与规格差距，补充剩余任务 |
+
+默认顺序：`constitution（一次）→ specify → clarify（按需）→ plan → checklist（按需）→ tasks → analyze → implement → converge`。明显属于既有缺陷修复、纯文档、纯工具安装或已有获批规格的任务，不得机械地重复整套流程。
+
+**自动调用的边界（不可协商）：**
+
+1. Spec Kit 的 spec/plan/tasks **不能替代** §A1-1 的 HLR/LLR 登记。产品代码实现前，必须把规格映射到 `CYW.Plugins/docs/lifecycle/requirements.md` 的需求编号、实现文件和验收场景；验证后映射到 VR 证据。
+2. **T3/T4 的计划批准仍是独立门禁**。`speckit.plan/tasks/analyze` 可主动执行，但只有用户已批准当前实现范围后，才可调用 `speckit.implement`。已经批准的 CYW.Printer（`CYWS-HLR-009`、`CYWS-PRN-001～020`）不得因本规则重复发起规格或重新规划，除非用户要求变更。
+3. 自动调度不包含自动提交、推送、打标签、正式发布、强制覆盖、修改生产服务器或绕过 G0–G5。涉及这些动作仍须按 §A、§B 与用户授权执行。
+4. 命令要求的 hook、检查或输入缺失失败时，必须显式报告并处理；禁止静默跳过、伪造命令结果或将计划场景写成已验证。
+5. Spec Kit 流程与既有 commander 团队并行时，仍遵守“一文件集一写入者”、验证者不修代码、计划→实现→审查→QA→文档→发布的既有门禁；冲突按 §0 的优先级仲裁。
 ### B4. 编码前检查清单（coder 类代理每次必查，并随交付回传结果）
 
 - [ ] 需求登记号已确认（或任务明确非新行为）
