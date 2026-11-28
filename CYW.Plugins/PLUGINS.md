@@ -24,8 +24,10 @@
 | `CYW.NetOptimizer/` | — | 网络优化 | M8 | 🚧 |
 | `CYW.MemoryManager/` | — | 内存管理 | M8 | 🚧 |
 | `CYW.EntityManager/` | — | 实体管理 | M8 | 🚧 |
-| `CYW.Printer/` | — | **接替 LocalAdmin 的控制台打印输出**（对标 `--printStd` 角色） | M8 | 🚧 |
+| `CYW.Printer/` | — | **CYW 自有输出可选 stdout**（仅公共 `CywLog` 记录；默认 Logger、双键 opt-in、失败回退；无全局接管）。逻辑目录保留，代码计划并入 `CYW.API/src/CywApi.Core/Printing/` 与 `CYW.API/src/CywApi/Printing/`，**不新建项目或运行时程序集** | 原 M8；提前至 **0.2.0 局部 M1–M3** | 🚧 需求已登记，待实现（CYWS-PRN-001～020） |
 | `CYW.LoadController/` | — | 加载顺序控制 | M8 | 🚧 |
+
+> **Printer 打包边界（0.2.0 计划）**：不得新增 `CywPrinter.Core` 或其他运行时 DLL；发布包继续保持当前两个第一方 DLL（`0CywApi`、`CywApi.Core`）+ `0Harmony`，沿用现有 `packaging.ps1` 分类与单层 zip 预期。`CYW.Printer/` 仅是注册/组织名，不得被解释为全局 LocalAdmin/ServerConsole 接管项目。
 
 ## 约定
 

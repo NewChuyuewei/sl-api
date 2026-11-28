@@ -3,6 +3,7 @@
 > 配套计划：`tasks/plan.md`
 > 图例：P0/P1/P2/P3 = 优先级；S/M/L = 规模（1-2 / 3-5 / 5+ 文件）
 > Phase 0–2 已细化；Phase 3+ 滚动细化（见计划 §5.3）｜ **v1.1 增补 Phase 7–9**（EXILED 对标子系统 / 自研增强工具 / 退役验收）
+> **当前插入周期（2026-11-28）**：CYW.Printer 0.2.0（原 Phase 8.4 提前，局部 M1–M3）；仅 CYW 自有输出，详见下方专节与 `docs/lifecycle/requirements.md`。
 
 ---
 
@@ -182,6 +183,34 @@
 
 ---
 
+## 当前插入特性周期：CYW.Printer 0.2.0（原 Phase 8.4 提前）
+
+> **已批准实现决策**：PRN-S1 否决全局接管（VR-023）后，用户选择仅 CYW 自有输出路线；PRN-S2 的可见 stdout 条件（VR-022）继续生效。目标版本 0.2.0，v0.1.0 tag/artifact 不动。需求基线为 **CYWS-HLR-009、CYWS-PRN-001～020**；这里的 M1/M2/M3 是 Printer 局部里程碑，**不表示上面的全局 M2 玩家与事件层已完成**。
+>
+> **范围锁**：仅公共 `CywLog.Debug/Info/Warn/Error` 的 CYW 自有记录；默认 Logger，`stdout` + 显示确认双键 opt-in；成功 direct 不镜像，其他/超限/失败走 Logger。禁止全局拦截、Harmony/新补丁类、ServerConsole/IServerOutput 或 Console writer/encoding 改动、队列/MEC/Thread/Task、新运行时程序集、新命令/权限/玩家数据。
+
+### Printer M1-0：需求门禁（P0，S，依赖：用户批准）✅ 文档登记完成，未提交
+- [x] 登记 HLR/LLR、五个配置键、文件映射、PRNC 验收映射与证据状态 `待收集`（CYWS-HLR-009、CYWS-PRN-001～020）
+- [x] 在 plan/todo/PLUGINS 记录原 M8 提前、缩减范围、无独立运行时程序集与无全局接管
+- [x] 本门禁只改文档；未创建产品/测试代码，未构建、未运行服务器、未复用 v0.1.0 QA 认证
+
+### Printer M1：Core、配置与离服验证（P0，M，依赖：M1-0）
+- [ ] **PRN-M1-1**：实现 `CywApi.Core/Printing/` 的 mode/level/settings/validator/route/formatter，并小改 `CywConfig.cs`；落实 PRN-001～008、011～012、016～018，禁止新增项目/程序集
+- [ ] **PRN-M1-2**：新增 `tests/CywApi.Tests/Printing/` validator/route/formatter 测试，执行 PRNC-T-001..008；现有 45 测试不降，Core 行 100%、分支 ≥97.83%，完成变异抽查
+- [ ] **PRN-M1-3**：审查两键 opt-in、整分区默认恢复、enable 快照、超限完整 fallback、LF/颜色/注入边界；证据全部绑定新构建，不标实现完成直至通过
+
+### Printer M2：LabAPI 接入与目标环境演示（P0，M，依赖：M1）
+- [ ] **PRN-M2-1**：实现 `CywApi/Printing/` 的 `PrinterModule`、`CywConsoleRouter`、`SystemConsoleLineSink`，小改 `CywLog.cs`/`CywPlugin.cs`；落实 PRN-009～010、013～015（disabled 不注册、默认 2/2、stdout Priority 90、同步 full-line WriteLine、双启动诊断）
+- [ ] **PRN-M2-2**：执行 PRNC-D-DEFAULT-01、PRNC-D-VISIBLE-01、PRNC-D-HIDDEN-01A、PRNC-D-HIDDEN-01B、PRNC-D-ANSI-01、PRNC-D-UNICODE-01、PRNC-D-MULTI-01、PRNC-D-INJECT-01、PRNC-D-CONFIG-01、PRNC-D-LIFE-01、PRNC-D-ROUND-01；每场景记录 0.2.0 新候选精确哈希与结果
+- [ ] **PRN-M2-3**：复核默认 Logger 格式/调用映射与 LOG-005 不退化；stdout 可见性、无镜像、跨通道无顺序保证及文档限制均有证据
+
+### Printer M3：加固、文档与发布（P0，M，依赖：M2）
+- [ ] **PRN-M3-1**：执行 PRNC-D-FAIL-01、PRNC-D-VOLUME-01、PRNC-D-COEX-01、PRNC-D-CLEAN-01、PRNC-D-MAN-TERMINAL-01；高容量按 PRN-019 记录 time/allocations/GC，>25% 退化须修复或所有者显式接受
+- [ ] **PRN-M3-2**：完成 PRN-020 文档：五个新键、重启生效、可见性确认、无镜像、`la_log_stdout_and_stderr: true` 文件保留及已知限制；未实测项保持 UNVERIFIED
+- [ ] **PRN-M3-3**：执行 PRNC-D-REL-01 与 G0–G5；确认包仍两个第一方 DLL + `0Harmony`，记录全新候选哈希，发布 0.2.0 且不修改 v0.1.0 tag/artifact
+
+---
+
 ## Phase 3+（滚动细化，进入时拆分为 T 级任务）
 
 ### Phase 3：命令框架（P0）
@@ -227,7 +256,7 @@
 - [ ] 8.1 Profiler（性能剖析：模块/补丁/事件订阅者耗时）
 - [ ] 8.2 Scheduler（调度器：任务队列 / tick 分片）
 - [ ] 8.3 NetOptimizer（网络优化）
-- [ ] 8.4 Printer：**接替 LocalAdmin 的控制台打印输出**（`--printStd` 角色；方案待设计）
+- [ ] 8.4 Printer：**已提前至当前 0.2.0 局部 M1–M3**；范围缩减为 CYW 自有输出可选 stdout，见上方专节（全局接管已否决，不再作为 Phase 8 待设计目标）
 - [ ] 8.5 其余按需取舍：MemoryManager / EntityManager / LoadController（评审决定去留）
 - [ ] CP8：按需交付清单确定，交付项实机验证
 
@@ -318,3 +347,7 @@
   - PRN-S2 裁决 **CONDITIONAL**，可见输出前置条件及隐藏模式、stderr 合并、Unicode 与跨通道顺序边界已实测并归档 VR-022。全局 `CYW.Printer` 编码仍须等待 PRN-S1 完成及需求登记；本记录不表示 Printer 已实现或批准编码。
 - **2026-11-23（PRN-S1 ServerConsole IL 核验）**
   - PRN-S1 裁决 **NO-GO**：所检查目标均无法同时接管正常管理展示并保留 TCP、LocalAdmin 日志、文件、control、RA 与无关 listener；全局 `AddLog` 替换亦无依据，证据归档 VR-023。用户随后将路线收窄为**仅 CYW 自有输出**并放弃全局拦截；Printer 仍未实现，需求登记与编码批准尚未完成。
+- **2026-11-28（CYW.Printer 0.2.0 需求门禁 M1-0）**
+  - 用户批准的 CYW 自有输出方案已登记为 CYWS-HLR-009、CYWS-PRN-001～020；五个 `printer.*` 配置键、计划文件与 PRNC-T/D 场景双向追溯齐备，所有实现证据均为 `待收集`。
+  - 原 Phase 8.4 Printer 提前至当前 0.2.0 局部 M1–M3；不表示全局 M2 玩家/事件或 M8 其他工具完成。无独立运行时程序集、无全局接管，v0.1.0 tag/artifact 与认证保持不变。
+  - 本次仅编辑 requirements/plan/todo/PLUGINS 四个文档，未创建代码、未构建、未运行服务器、未提交；编码可依照已登记任务开始，但不得据此宣称 built/tested/实机通过。

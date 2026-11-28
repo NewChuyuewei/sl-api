@@ -1,6 +1,7 @@
 # 实施计划：CYW's API — SCP:SL 插件框架
 
 > **状态**：已评审并确认（2026-11-07）｜ **v1.1 修订（2026-11-08）**：定位升级为「轻量级综合 API——对标并**替代 EXILED**」（新增 §1.5；里程碑增补 M7–M9；§5.2/§5.3/§6/§8 同步增补）
+> **v1.2 修订（2026-11-28）**：原 M8 Printer 经用户批准提前至当前 **0.2.0** 特性周期，范围收窄为 CYW 自有输出可选 stdout；全局接管路线已否决（§4.1）。
 > **任务清单**：`tasks/todo.md`（Phase 0–2 已细化；Phase 3+ 为滚动细化）
 > **制定方法**：context7 MCP（LabAPI 官方文档）+ SCP:SL 技能套件（scpsl-plugin-dev / scpsl-labapi / scpsl-migration-release / planning-and-task-breakdown）+ 对 `example/LabExtended-master` 的只读全量盘点（探索代理）+ GitHub 公开信息核查
 
@@ -72,7 +73,7 @@
 | Exiled.CreditTags | 名牌/头衔 | `CYW.NameTag` | **M7b** | 🚧 |
 | Exiled.Loader | 加载器与生态协议（第三方依赖） | `CYW.Loader`（互操作 API 程序集） | **M7c** | 🚧 |
 | Exiled.Installer | 安装器工具 | `CYW.Installer` | **M7d** | 🚧 |
-| （无对标，自研） | Profiler / Scheduler / NetOptimizer / MemoryManager / EntityManager / **Printer（接替 LocalAdmin 的控制台打印输出）** / LoadController | 各自目录（按需取舍） | M8 | 🚧 |
+| （无对标，自研） | Profiler / Scheduler / NetOptimizer / MemoryManager / EntityManager / **Printer（仅 CYW 自有输出可选 stdout；全局接管已否决）** / LoadController | 各自目录（按需取舍）；Printer 代码并入现有两个项目 | M8；**Printer 提前至 0.2.0** | 🚧 Printer 需求已登记，待实现；其余按需 |
 
 ### EXILED 退役验收清单（Replacement Definition of Done）
 
@@ -133,11 +134,24 @@ M4 自定义内容 ──▶ CP4a 物品/枪械/投掷物；CP4b 角色/队伍/�
 M5 呈现与交互 ──▶ CP5a Hints 叠层；CP5b Settings；CP5c RA API；CP5d Toys/地图；CP5e 语音(可选)
 M6 打磨与发布 ──▶ CP6: 发布清单全过 + 干净服务器验收 + v0.1 公开
 M7 EXILED 对标完备 ─▶ CP7: Permissions / NameTag / Loader 生态协议 / Installer（§1.5 矩阵）可用
-M8 自研增强工具轨 ──▶ CP8: Profiler / Scheduler / NetOptimizer 等按需交付
+M8 自研增强工具轨 ──▶ CP8: Profiler / Scheduler / NetOptimizer 等按需交付（Printer 已提前拆出，见 §4.1）
 M9 EXILED 退役验收 ─▶ CP9: §1.5 退役清单逐项签收 → v1.0
 ```
 
 每个检查点都包含固定的**服务器冒烟循环**：`启动 → 插件加载 → 完整回合 → 重载/重启 → 禁用 → 无错误日志`。
+
+### 4.1 插入特性周期：CYW.Printer 0.2.0（原 M8 提前）
+
+- **重排裁决**：原 M8/Phase 8 的“接替 LocalAdmin 控制台打印输出”Printer 经用户显式批准，提前到当前 **0.2.0** 特性周期。PRN-S1 对全局接管作出 **NO-GO**（VR-023）后，全局拦截路线已放弃；PRN-S2 的 **CONDITIONAL**（VR-022）只支持满足可见 stdout 前置条件的 CYW 自有输出路线。本重排不代表 M8 其他工具交付，也不代表全局 **M2 玩家与事件层**已完成。
+- **缩减范围**：只处理公共 `CywLog.Debug/Info/Warn/Error` 主动发出的 CYW 自有记录；默认 `printer.mode: disabled` 保持 v0.1.0 Logger 路由与格式。只有 `stdout` + 显示确认双键同时成立才走同步 direct stdout，且成功 direct 不镜像；其他情况、超限与失败均回退 Logger。无全局拦截、无 Harmony/新补丁类、无 Console writer/encoding 改动、无队列/后台工作、无新命令/权限/玩家数据。
+- **结构/版本**：实现位于现有 `CywApi.Core/Printing/`、`CywApi/Printing/` 与三处小集成编辑；**不创建独立 `CywPrinter.Core` 或任何新运行时程序集**，包仍为两个第一方 DLL + `0Harmony`。目标版本 **0.2.0**，v0.1.0 tag/artifact 不动，QA 使用新候选精确哈希。完整需求/配置/场景追溯见 `docs/lifecycle/requirements.md` CYWS-HLR-009、CYWS-PRN-001～020。
+
+| Printer 局部里程碑 | 交付范围 | 退出条件 | 当前状态 |
+|---|---|---|---|
+| **M1-0 需求门禁** | 批准范围、HLR/LLR、配置契约、验收映射、路线图与注册表 | 四项文档完成双向追溯；无产品代码 | ✅ 本次登记完成（未提交） |
+| **M1 Core 与配置** | `PrinterMode` / `PrinterLogLevel` / `PrinterSettings` / validator / route decider / line formatter；`CywConfig` 集成；PRNC-T-001..008 | 0/0 构建、现有 45 + 新测试通过、覆盖率棘轮与变异抽查通过 | ⏳ 待实现/待收集 |
+| **M2 LabAPI 接入与目标演示** | `PrinterModule` / `CywConsoleRouter` / `SystemConsoleLineSink` 与 `CywLog`/`CywPlugin` 小改；默认 2/2、stdout Priority 90、双启动诊断与 fallback | PRNC-D-DEFAULT-01、VISIBLE-01、HIDDEN-01A/01B、ANSI-01、UNICODE-01、MULTI-01、INJECT-01、CONFIG-01、LIFE-01、ROUND-01（均同属 `PRNC-D-` 前缀）通过并绑定新候选哈希 | ⏳ 待实现/待收集 |
+| **M3 加固与 0.2.0 发布** | 故障、高容量、共存、干净安装、可见终端人工核对；README/CHANGELOG/发布文档与打包 | PRNC-D-FAIL-01、VOLUME-01、COEX-01、CLEAN-01、MAN-TERMINAL-01、REL-01（均同属 `PRNC-D-` 前缀）全过；>25% 退化已修复或所有者显式接受；G0–G5 裁决 | ⏳ 待实现/待收集 |
 
 ---
 
@@ -177,7 +191,7 @@ M9 EXILED 退役验收 ─▶ CP9: §1.5 退役清单逐项签收 → v1.0
 | EXILED 对标：NameTag | Exiled.CreditTags 对标 | P2 | M7b | 名牌/头衔展示 |
 | EXILED 对标：Loader 生态协议 | Exiled.Loader 对标 | P1 | M7c | 版本化互操作 API + 依赖解析；触发 promotion rule 评审 |
 | EXILED 对标：Installer | Exiled.Installer 对标 | P2 | M7d | 安装/升级工具 |
-| 自研增强工具 | — | P3 | M8 | Profiler/Scheduler/NetOptimizer/MemoryManager/EntityManager/LoadController（按需）；**Printer：接替 LocalAdmin 的控制台打印输出** |
+| 自研增强工具 | — | P3 | M8；Printer 提前至 0.2.0 | Profiler/Scheduler/NetOptimizer/MemoryManager/EntityManager/LoadController（按需）；**Printer：仅 CYW 自有输出可选 stdout，见 §4.1** |
 
 ### 5.3 Phase 3+ 滚动细化（到达该阶段时再拆成 T 级任务）
 
@@ -186,7 +200,7 @@ M9 EXILED 退役验收 ─▶ CP9: §1.5 退役清单逐项签收 → v1.0
 - **Phase 5 呈现与交互**：5a Hints（控制器/元素/补丁）→ 5b Settings → 5c RA API → 5d Toys/Prefabs/地图包装 → 5e 语音（可选，默认最后）
 - **Phase 6 打磨发布**：修复类补丁按需 → 文档（README/API XML/教程）→ 示例插件 → CI 完善 → 发布清单 → v0.1
 - **Phase 7 EXILED 对标子系统**：7a Permissions（节点/组/继承 → 命令集成）→ 7b NameTag → 7c Loader 生态协议（互操作 API 拆分评审 + 依赖解析）→ 7d Installer
-- **Phase 8 自研增强工具**（按需）：Profiler → Scheduler → NetOptimizer → MemoryManager / EntityManager / LoadController；**Printer（接替 LocalAdmin 的控制台打印输出）**
+- **Phase 8 自研增强工具**（按需）：Profiler → Scheduler → NetOptimizer → MemoryManager / EntityManager / LoadController；**Printer 已从本阶段提前拆出为 0.2.0 局部 M1–M3（§4.1），不再包含全局接管目标**
 - **Phase 9 EXILED 退役验收**：§1.5 矩阵签收 → 退役清单 → 迁移对照表 → 性能基线 → v1.0
 
 ---
